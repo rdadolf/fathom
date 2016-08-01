@@ -48,10 +48,10 @@ class ClippedReluRNNCell(tf.nn.rnn_cell.RNNCell):
 
 # TODO: show label error rate
 # TODO: avoid labels and blank off-by-one error due to padding zeros
-class TF_SPEECH(NeuralNetworkModel):
+class Speech(NeuralNetworkModel):
   """RNN for speech recognition."""
   def __init__(self, device=None, init_options=None):
-    super(TF_SPEECH,self).__init__(device=device, init_options=init_options)
+    super(Speech,self).__init__(device=device, init_options=init_options)
 
   #def inference(self, inputs, n_hidden=2048):
   def build_inference(self, inputs, n_hidden=1024):
@@ -141,7 +141,7 @@ class TF_SPEECH(NeuralNetworkModel):
       istate_bw = tf.placeholder("float", [None, n_hidden])
 
       # TODO: support both tanh (default) and clipped_relu
-      outputs, output_state_fw, output_state_bw = tf.nn.rnn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
+      outputs, output_state_fw, output_state_bw = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
 
       # TODO: is this the right output?
       return outputs[-1]
@@ -199,7 +199,7 @@ class TF_SPEECH(NeuralNetworkModel):
     return self._labels
 
   def build(self):
-    super(TF_SPEECH, self).build()
+    super(Speech, self).build()
 
     with self.G.as_default():
       self.decode_op = self.decoding()
@@ -255,11 +255,11 @@ class TF_SPEECH(NeuralNetworkModel):
     """Convert a list of label indices to a list of corresponding phonemes."""
     return [index2phoneme_dict[label] for label in decoded_labels]
 
-class TF_SPEECH_FW(TF_SPEECH):
+class SpeechFwd(Speech):
   forward_only = True
 
 if __name__=='__main__':
-  m = TF_SPEECH()
+  m = Speech()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep(), n_steps=10)
   m.teardown()

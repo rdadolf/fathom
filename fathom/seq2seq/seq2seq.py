@@ -13,7 +13,7 @@ from nnmodel.frameworks.tf import TFFramework
 
 import data_utils
 
-class TF_SEQ2SEQ(NeuralNetworkModel):
+class Seq2Seq(NeuralNetworkModel):
   """Based on TensorFlow example of sequence-to-sequence translation."""
   def build_inputs(self):
     # Feeds for inputs.
@@ -443,11 +443,11 @@ class TF_SEQ2SEQ(NeuralNetworkModel):
       batch_weights.append(batch_weight)
     return batch_encoder_inputs, batch_decoder_inputs, batch_weights
 
-class TF_SEQ2SEQ_FW(TF_SEQ2SEQ):
+class Seq2SeqFwd(Seq2Seq):
   forward_only = True
 
 if __name__=='__main__':
-  m = TF_SEQ2SEQ()
+  m = Seq2Seq()
   m.setup()
   m.run(TFFramework.DefaultRunstep())
   m.teardown()

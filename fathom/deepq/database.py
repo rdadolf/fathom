@@ -1,4 +1,3 @@
-# NOTE: Tejas Kulkarni's implementation
 import numpy as np
 import gc
 import time

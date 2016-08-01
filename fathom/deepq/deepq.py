@@ -170,12 +170,12 @@ class DeepQNetNature(object):
       self.rmsprop = tf.train.RMSPropOptimizer(self.params['lr'],self.params['rms_decay'],0.0,self.params['rms_eps']).minimize(self.cost,global_step=self.global_step)
       return self.rmsprop
 
-class TF_DEEPQNET(TFModel):
+class DeepQ(TFModel):
   """Deep Q-Learning."""
   forward_only = False
 
   def __init__(self, device=None, init_options=None, game=nature_params['game']):
-    super(TF_DEEPQNET,self).__init__(device=device, init_options=init_options)
+    super(DeepQ,self).__init__(device=device, init_options=init_options)
     assert game in ["breakout", "space_invaders", "seaquest"]
 
     self.G = tf.Graph()
@@ -233,7 +233,7 @@ class TF_DEEPQNET(TFModel):
     return self.G
 
   def setup(self, setup_options=None):
-    super(TF_DEEPQNET,self).setup(setup_options=setup_options)
+    super(DeepQ,self).setup(setup_options=setup_options)
     with self.G.as_default():
       if setup_options is None:
         self.setup_config = tf.ConfigProto(gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=self.params['gpu_fraction']))
@@ -436,11 +436,11 @@ class TF_DEEPQNET(TFModel):
       self.sess.close()
       self.sess = None
 
-class TF_DEEPQNET_FW(TF_DEEPQNET):
+class DeepQFwd(DeepQ):
   forward_only = True
 
 if __name__=='__main__':
-  m = TF_DEEPQNET()
+  m = DeepQ()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep(),n_steps=100000000)
   m.teardown()
