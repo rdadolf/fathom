@@ -8,7 +8,7 @@ import random
 import sys
 import time
 
-from models.tf.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel
 from nnmodel.frameworks.tf import TFFramework
 
 import data_utils

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import tensorflow as tf
 
-import models.tf.imagenet.mnist as input_data
-from models.tf.imagenet import imagenet
-from models.tf.nn import NeuralNetworkModel
+import fathom.imagenet.mnist as input_data
+from fathom.imagenet import imagenet
+from fathom.nn import NeuralNetworkModel
 from nnmodel.frameworks.tf import TFFramework
 
 def conv2d(name, l_input, w, b):
@@ -15,7 +15,7 @@ def max_pool(name, l_input, k):
 def norm(name, l_input, lsize=4):
     return tf.nn.lrn(l_input, lsize, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name=name)
 
-class TF_ALEXNET(imagenet.ImagenetModel):
+class AlexNet(imagenet.ImagenetModel):
   """Based on Aymeric Damien's TensorFlow example of AlexNet."""
   def build_inference(self, images):
     with self.G.as_default():
@@ -132,11 +132,11 @@ class TF_ALEXNET(imagenet.ImagenetModel):
     # TODO: can this not be a placeholder?
     self.keep_prob = tf.placeholder(tf.float32) # dropout (keep probability)
 
-class TF_ALEXNET_FW(TF_ALEXNET):
+class AlexNetFwd(AlexNet):
   forward_only = True
 
 if __name__=='__main__':
-  m = TF_ALEXNET()
+  m = AlexNet()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep())
   m.teardown()

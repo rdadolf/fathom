@@ -14,10 +14,10 @@ try:
 except ImportError:
   from tensorflow.python.ops.rnn_cell import _linear
 
-from models.tf.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel
 
-from models.tf.speech.preproc import load_timit, timit_hdf5_filepath
-from models.tf.speech.phoneme import index2phoneme_dict
+from preproc import load_timit, timit_hdf5_filepath
+from phoneme import index2phoneme_dict
 
 
 def clipped_relu(inputs, clip=20):

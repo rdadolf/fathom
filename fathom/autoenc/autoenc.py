@@ -4,8 +4,8 @@ import tensorflow as tf
 
 import numpy as np
 import sklearn.preprocessing as prep
-from models.tf.nn import NeuralNetworkModel
-import models.tf.imagenet.mnist as input_data
+from fathom.nn import NeuralNetworkModel
+import fathom.imagenet.mnist as input_data
 from nnmodel.frameworks.tf import TFModel, TFFramework
 from abc import ABCMeta, abstractmethod
 
@@ -20,7 +20,7 @@ def standard_scale(X_train, X_test):
   return X_train, X_test
 
 # heavily based on tensorflow.models.autoencoder
-class TF_AUTOENCODER(NeuralNetworkModel):
+class AutoencBase(NeuralNetworkModel):
   """Basic Autoencoder (denoising optional)."""
   def load_data(self):
     # Grab the dataset from the internet, if necessary
@@ -203,11 +203,11 @@ def get_random_block_from_data(data, batch_size):
   start_index = np.random.randint(0, len(data) - batch_size)
   return data[start_index:(start_index + batch_size)]
 
-class TF_AUTOENCODER_FW(TF_AUTOENCODER):
+class AutoencBaseFwd(AutoencBase):
   forward_only = True
 
 if __name__ == "__main__":
-  m = TF_AUTOENCODER_FW()
+  m = AutoencBase()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep())
   m.teardown()

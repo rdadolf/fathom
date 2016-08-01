@@ -3,7 +3,7 @@
 # (https://github.com/mrkulk/deepQN_tensorflow).
 import tensorflow as tf
 
-from models.tf.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel
 from nnmodel.frameworks.tf import TFFramework, TFModel
 from abc import ABCMeta, abstractmethod
 

@@ -1,2 +1,0 @@
-from autoencoder import standard_scale, xavier_init, get_random_block_from_data, TF_AUTOENCODER, TF_AUTOENCODER_FW
-from variational import TF_VARIATIONAL_AUTOENCODER, TF_VARIATIONAL_AUTOENCODER_FW

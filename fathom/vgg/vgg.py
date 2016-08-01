@@ -2,14 +2,14 @@
 
 import tensorflow as tf
 
-from models.tf.nn import NeuralNetworkModel
-import models.tf.imagenet.mnist as input_data
-from models.tf.imagenet import imagenet
+from fathom.nn import NeuralNetworkModel
+import fathom.imagenet.mnist as input_data
+from fathom.imagenet import imagenet
 from nnmodel.frameworks.tf import TFFramework
 
 from math import sqrt
 
-class TF_VGG(imagenet.ImagenetModel):
+class VGG(imagenet.ImagenetModel):
   """VGG Network."""
   def build_hyperparameters(self):
     # TODO: put these into runstep options or somewhere else
@@ -120,11 +120,11 @@ def mpool_op(input_op, name, kh, kw, dh, dw):
                         padding='VALID',
                         name=name)
 
-class TF_VGG_FW(TF_VGG):
+class VGGFwd(VGG):
   forward_only = True
 
 if __name__ == "__main__":
-  m = TF_VGG()
+  m = VGG()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep())
   m.teardown()

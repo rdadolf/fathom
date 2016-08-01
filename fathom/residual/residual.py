@@ -2,16 +2,16 @@
 
 import tensorflow as tf
 
-from models.tf.nn import NeuralNetworkModel
-import models.tf.imagenet.mnist as input_data
-from models.tf.imagenet import imagenet
+from fathom.nn import NeuralNetworkModel
+import fathom.imagenet.mnist as input_data
+from fathom.imagenet import imagenet
 from nnmodel.frameworks.tf import TFFramework
 from collections import namedtuple
 
 from math import sqrt
 
 # Code heavily based on Parag Mital's TensorFlow tutorials.
-class TF_RESNET(imagenet.ImagenetModel):
+class Residual(imagenet.ImagenetModel):
   """Residual Network."""
   def build_hyperparameters(self):
     # Parameters
@@ -184,11 +184,11 @@ def linear(x, n_units, scope=None, stddev=0.02,
           tf.random_normal_initializer(stddev=stddev))
       return activation(tf.matmul(x, matrix))
 
-class TF_RESNET_FW(TF_RESNET):
+class ResidualFwd(Residual):
   forward_only = True
 
 if __name__ == "__main__":
-  m = TF_RESNET()
+  m = Residual()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep())
   m.teardown()

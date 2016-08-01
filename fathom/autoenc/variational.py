@@ -4,15 +4,15 @@ import tensorflow as tf
 
 import numpy as np
 import sklearn.preprocessing as prep
-import models.tf.imagenet.mnist as input_data
+import fathom.imagenet.mnist as input_data
 from nnmodel.frameworks.tf import TFModel, TFFramework
-from models.tf.autoencoder import xavier_init, get_random_block_from_data, standard_scale, TF_AUTOENCODER
-from models.tf.nn import NeuralNetworkModel
+from fathom.autoenc.autoenc import xavier_init, get_random_block_from_data, standard_scale, AutoencBase
+from fathom.nn import NeuralNetworkModel
 
 from math import sqrt
 
 # heavily based on tensorflow.models.autoencoder
-class TF_VARIATIONAL_AUTOENCODER(TF_AUTOENCODER):
+class Autoenc(AutoencBase):
   """Variational Autoencoder."""
   def build_inference(self, inputs, transfer_function=tf.nn.softplus, scale=0.1):
     with self.G.as_default():
@@ -62,11 +62,11 @@ class TF_VARIATIONAL_AUTOENCODER(TF_AUTOENCODER):
       hidden = np.random.normal(size=self.weights["b1"])
     return self.session.run(self.reconstruction, feed_dict={self.z_mean: hidden})
 
-class TF_VARIATIONAL_AUTOENCODER_FW(TF_VARIATIONAL_AUTOENCODER):
+class AutoencFwd(Autoenc):
   forward_only = True
 
 if __name__ == "__main__":
-  m = TF_VARIATIONAL_AUTOENCODER()
+  m = Autoenc()
   m.setup()
   m.run(runstep=TFFramework.DefaultRunstep())
   m.teardown()

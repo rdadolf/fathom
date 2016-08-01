@@ -2,11 +2,11 @@
 
 import tensorflow as tf
 
-from models.tf.nn import NeuralNetworkModel
-from models.tf.dataset import Dataset
-import models.tf.imagenet.mnist as input_data
+from fathom.nn import NeuralNetworkModel
+from fathom.dataset import Dataset
+import fathom.imagenet.mnist as input_data
 from nnmodel.frameworks.tf import TFFramework
-from models.tf.imagenet.image_processing import inputs, distorted_inputs, batch_inputs
+from fathom.imagenet.image_processing import inputs, distorted_inputs, batch_inputs
 
 # TODO: don't hard-code this
 imagenet_record_dir = '/data/ILSVRC2012/imagenet-tfrecord/'

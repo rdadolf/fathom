@@ -5,7 +5,7 @@
 import tensorflow as tf
 import numpy as np
 
-from models.tf.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel
 from nnmodel.frameworks.tf import TFFramework
 
 from data_utils import load_task, vectorize_data
@@ -15,7 +15,7 @@ from itertools import chain
 data_dir = "/data/babi/tasks_1-20_v1-2/en/"
 task_id = 1
 
-class TF_MEMN2N(NeuralNetworkModel):
+class MemNet(NeuralNetworkModel):
   def build_inference(self, inputs):
     stories, queries = self.inputs
 
@@ -269,11 +269,11 @@ def add_gradient_noise(t, stddev=1e-3, name=None):
         gn = tf.random_normal(tf.shape(t), stddev=stddev)
         return tf.add(t, gn, name=name)
 
-class TF_MEMN2N_FW(TF_MEMN2N):
+class MemNetFwd(MemNet):
   forward_only = True
 
 if __name__=='__main__':
-  m = TF_MEMN2N()
+  m = MemNet()
   m.setup()
   m.run(TFFramework.DefaultRunstep(), n_steps=100)
   m.teardown()
