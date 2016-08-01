@@ -1,0 +1,4 @@
+matplotlib
+numpy
+pylint>=1.6.1
+tensorflow>=0.8.0rc0
