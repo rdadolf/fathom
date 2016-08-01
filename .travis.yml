@@ -1,6 +1,8 @@
 language: python
 script:
-  - nosetests -v
+  - pylint -rn fathom/
+  - pylint -rn test/
+  - nosetests -v test/
 notifications:
   email:
     on_success: never
