@@ -2,23 +2,19 @@
 
 """Dominique Luna's implementation of End-to-End Memory Networks, refactored."""
 
+from itertools import chain
 import tensorflow as tf
 import numpy as np
-
+from sklearn import cross_validation
 from fathom.nn import NeuralNetworkModel
 from nnmodel.frameworks.tf import TFFramework
-
 from data_utils import load_task, vectorize_data
-from sklearn import cross_validation
-from itertools import chain
 
 data_dir = "/data/babi/tasks_1-20_v1-2/en/"
 task_id = 1
 
 class MemNet(NeuralNetworkModel):
   def build_inference(self, inputs):
-    stories, queries = self.inputs
-
     with self.G.as_default():
       self.encoding_op = tf.constant(self.encoding(self.sentence_size, self.embedding_size), name="encoding")
 
@@ -95,10 +91,10 @@ class MemNet(NeuralNetworkModel):
       grads_and_vars = [(add_gradient_noise(g), v) for g,v in grads_and_vars]
       nil_grads_and_vars = []
       for g, v in grads_and_vars:
-          if v.name in self.nil_vars:
-              nil_grads_and_vars.append((zero_nil_slot(g), v))
-          else:
-              nil_grads_and_vars.append((g, v))
+        if v.name in self.nil_vars:
+          nil_grads_and_vars.append((zero_nil_slot(g), v))
+        else:
+          nil_grads_and_vars.append((g, v))
 
       self.train_op = self.opt.apply_gradients(nil_grads_and_vars, name="train_op")
 
@@ -167,7 +163,7 @@ class MemNet(NeuralNetworkModel):
     self.load_data() # TODO: get static numbers for the things that currently require loading and move this to run
 
     with self.G.as_default():
-      # inputs 
+      # inputs
       self.stories = tf.placeholder(tf.int32, [None, self.memory_size, self.sentence_size], name="stories")
       self.queries = tf.placeholder(tf.int32, [None, self.sentence_size], name="queries")
 
@@ -186,9 +182,6 @@ class MemNet(NeuralNetworkModel):
     return self.answers
 
   def run(self, runstep=None, n_steps=1):
-    values = tf.RunMetadata()
-    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-
     # load babi data
     # vocab, memory, sentence sizes set here
     # TODO: get static data size numbers and don't load in inputs anymore
@@ -198,7 +191,7 @@ class MemNet(NeuralNetworkModel):
     start = 0
     assert self.batch_size<self.n_train, 'Batch size is larger than training data---something is horribly wrong'
     end = self.batch_size
-    for step in range(1, n_steps+1):
+    for _ in range(1, n_steps+1):
       s = self.trainS[start:end]
       q = self.trainQ[start:end]
       a = self.trainA[start:end]
@@ -207,14 +200,14 @@ class MemNet(NeuralNetworkModel):
 
       if not self.forward_only:
         # Fit training using batch data
-        _, loss_value, train_acc = runstep(
-            self.session, 
+        _, _, _ = runstep(
+            self.session,
             [self.train, self.loss, self.accuracy],
             feed_dict=feed,
         )
       else:
         _ = runstep(
-            self.session, 
+            self.session,
             self.outputs,
             feed_dict=feed,
         )
@@ -233,41 +226,41 @@ class MemNet(NeuralNetworkModel):
     print("Test accuracy: {:.5f}".format(acc))
 
 def position_encoding(sentence_size, embedding_size):
-    """
-    Position Encoding described in section 4.1 [1]
-    """
-    encoding = np.ones((embedding_size, sentence_size), dtype=np.float32)
-    ls = sentence_size+1
-    le = embedding_size+1
-    for i in range(1, le):
-        for j in range(1, ls):
-            encoding[i-1, j-1] = (i - (le-1)/2) * (j - (ls-1)/2)
-    encoding = 1 + 4 * encoding / embedding_size / sentence_size
-    return np.transpose(encoding)
+  """
+  Position Encoding described in section 4.1 [1]
+  """
+  encoding = np.ones((embedding_size, sentence_size), dtype=np.float32)
+  ls = sentence_size+1
+  le = embedding_size+1
+  for i in range(1, le):
+    for j in range(1, ls):
+      encoding[i-1, j-1] = (i - (le-1)/2) * (j - (ls-1)/2)
+  encoding = 1 + 4 * encoding / embedding_size / sentence_size
+  return np.transpose(encoding)
 
 def zero_nil_slot(t, name=None):
-    """
-    Overwrites the nil_slot (first row) of the input Tensor with zeros.
-    The nil_slot is a dummy slot and should not be trained and influence
-    the training algorithm.
-    """
-    with tf.op_scope([t], name, "zero_nil_slot") as name:
-        t = tf.convert_to_tensor(t, name="t")
-        s = tf.shape(t)[1]
-        z = tf.zeros(tf.pack([1, s]))
-        return tf.concat(0, [z, tf.slice(t, [1, 0], [-1, -1])], name=name)
+  """
+  Overwrites the nil_slot (first row) of the input Tensor with zeros.
+  The nil_slot is a dummy slot and should not be trained and influence
+  the training algorithm.
+  """
+  with tf.op_scope([t], name, "zero_nil_slot") as name:
+    t = tf.convert_to_tensor(t, name="t")
+    s = tf.shape(t)[1]
+    z = tf.zeros(tf.pack([1, s]))
+    return tf.concat(0, [z, tf.slice(t, [1, 0], [-1, -1])], name=name)
 
 def add_gradient_noise(t, stddev=1e-3, name=None):
-    """
-    Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2].
-    The input Tensor `t` should be a gradient.
-    The output will be `t` + gaussian noise.
-    0.001 was said to be a good fixed value for memory networks [2].
-    """
-    with tf.op_scope([t, stddev], name, "add_gradient_noise") as name:
-        t = tf.convert_to_tensor(t, name="t")
-        gn = tf.random_normal(tf.shape(t), stddev=stddev)
-        return tf.add(t, gn, name=name)
+  """
+  Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2].
+  The input Tensor `t` should be a gradient.
+  The output will be `t` + gaussian noise.
+  0.001 was said to be a good fixed value for memory networks [2].
+  """
+  with tf.op_scope([t, stddev], name, "add_gradient_noise") as name:
+    t = tf.convert_to_tensor(t, name="t")
+    gn = tf.random_normal(tf.shape(t), stddev=stddev)
+    return tf.add(t, gn, name=name)
 
 class MemNetFwd(MemNet):
   forward_only = True

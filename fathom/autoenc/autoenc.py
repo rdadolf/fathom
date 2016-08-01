@@ -1,15 +1,12 @@
 #!/usr/bin/env python
 
-import tensorflow as tf
-
+from math import sqrt
 import numpy as np
 import sklearn.preprocessing as prep
+import tensorflow as tf
 from fathom.nn import NeuralNetworkModel
 import fathom.imagenet.mnist as input_data
-from nnmodel.frameworks.tf import TFModel, TFFramework
-from abc import ABCMeta, abstractmethod
 
-from math import sqrt
 
 # TODO: create an unsupervised parent class
 
@@ -37,7 +34,7 @@ class AutoencBase(NeuralNetworkModel):
 
     # Network Parameters
     self.n_hidden = 200
-  
+
     # TODO: remove this data-specific stuff
     self.n_input = 784 # MNIST data input (img shape: 28*28)
 
@@ -71,9 +68,6 @@ class AutoencBase(NeuralNetworkModel):
     self.load_data()
 
     with self.G.as_default():
-      values = tf.RunMetadata()
-      run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-
       # %% We'll train in minibatches and report accuracy:
       self.epochs = 20
       self.display_step = 1
@@ -98,7 +92,7 @@ class AutoencBase(NeuralNetworkModel):
           if not self.forward_only:
             # train on batch
             _, loss_value = runstep(
-                self.session, 
+                self.session,
                 [self.train, self.loss],
                 feed_dict={self.xs: batch_xs, self.scale: self.training_scale},
                 #options=run_options, run_metadata=values
@@ -106,7 +100,7 @@ class AutoencBase(NeuralNetworkModel):
           else:
             # run forward on train batch
             _ = runstep(
-                self.session, 
+                self.session,
                 self.outputs,
                 feed_dict={self.xs: batch_xs}
             )
@@ -150,7 +144,7 @@ class AutoencBase(NeuralNetworkModel):
 
   def build_loss(self, inputs, reconstruction):
     with self.G.as_default():
-       self.loss_op = 0.5 * tf.reduce_sum(tf.pow(tf.sub(reconstruction, inputs), 2.0))
+      self.loss_op = 0.5 * tf.reduce_sum(tf.pow(tf.sub(reconstruction, inputs), 2.0))
     return self.loss_op
 
   @property

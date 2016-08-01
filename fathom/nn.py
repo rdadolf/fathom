@@ -2,17 +2,14 @@
 
 import tensorflow as tf
 from abc import ABCMeta, abstractmethod, abstractproperty
-from nnmodel.frameworks.tf import TFModel 
-from functools import wraps
-import inspect
-import new
-import copy
+from nnmodel.frameworks.tf import TFModel
 
 # TODO: make sure this interface works for both CNNs and RNNs
 # roughly based on TensorFlow CIFAR-10 example
 # TODO: better name?
 # TODO: simplify dev set
 class NeuralNetworkModel(TFModel):
+  __metaclass__ = ABCMeta
   forward_only = False
 
   def __init__(self, device=None, init_options=None):

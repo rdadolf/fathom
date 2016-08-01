@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-import time
 import numpy as np
 import tensorflow as tf
-
-from nnmodel.frameworks.tf import TFModel, TFFramework
 
 #from tensorflow.models.rnn import rnn, rnn_cell
 from tensorflow.python.ops import functional_ops
@@ -89,8 +86,8 @@ class Speech(NeuralNetworkModel):
 
       # CTC
       self.loss_op = tf.contrib.ctc.ctc_loss(
-        inputs=self.logits_t, 
-        labels=self.sparse_labels, 
+        inputs=self.logits_t,
+        labels=self.sparse_labels,
         sequence_length=self.seq_lens
       )
 
@@ -217,7 +214,7 @@ class Speech(NeuralNetworkModel):
   def decoding(self):
     """Predict labels from learned sequence model."""
     # TODO: label error rate on validation set
-    decoded, log_probs = tf.contrib.ctc.ctc_greedy_decoder(self.logits_t, self.seq_lens)
+    decoded, _ = tf.contrib.ctc.ctc_greedy_decoder(self.logits_t, self.seq_lens)
     sparse_decode_op = decoded[0] # single-element list
     self.decode_op = tf.sparse_to_dense(sparse_decode_op.indices, sparse_decode_op.shape, sparse_decode_op.values)
     return self.decode_op
@@ -228,21 +225,21 @@ class Speech(NeuralNetworkModel):
 
     with self.G.as_default():
       print 'Starting run...'
-      for step in xrange(n_steps):
+      for _ in xrange(n_steps):
         spectrogram_batch, label_batch, seq_len_batch = self.get_random_batch()
 
         if not self.forward_only:
-          _, loss_value = runstep(self.session, 
-              [self.train_op, self.loss_op], 
+          _, _ = runstep(self.session,
+              [self.train_op, self.loss_op],
               feed_dict={self.inputs: spectrogram_batch, self.labels: label_batch, self.seq_lens: seq_len_batch})
         else:
           # run forward-only on train batch
-          _ = runstep(self.session, 
+          _ = runstep(self.session,
               self.outputs,
               feed_dict={self.inputs: spectrogram_batch, self.labels: label_batch, self.seq_lens: seq_len_batch})
 
         # decode the same batch, for debugging
-        decoded = self.session.run(self.decode_op, 
+        decoded = self.session.run(self.decode_op,
             feed_dict={self.inputs: spectrogram_batch, self.labels: label_batch, self.seq_lens: seq_len_batch})
 
         # print some decoded examples

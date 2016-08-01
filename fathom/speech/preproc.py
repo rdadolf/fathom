@@ -10,10 +10,7 @@ import h5py
 import logging
 from tqdm import tqdm # progress bar
 
-import datetime
 import os
-import sys
-import glob
 import fnmatch
 
 from phoneme import timit_phonemes, phoneme2index_list, phoneme2index_dict
@@ -45,16 +42,16 @@ logger.addHandler(ch)
 def recursive_glob_ext(dirpath, ext):
   """Recursively find files with an extension in a TIMIT directory."""
   return [os.path.splitext(os.path.join(dirpath, filename))[0] # remove extension
-    for dirpath, dirnames, files in os.walk(dirpath) 
+    for dirpath, _, files in os.walk(dirpath)
     for filename in fnmatch.filter(files, '*.{}'.format(ext))]
 
 
 def mfcc_features(filename):
-  """Preprocessing per CTC paper. 
-  
+  """Preprocessing per CTC paper.
+
   (These are not the simpler linear spectrogram features alone as in Deep
   Speech).
-  
+
   Properties:
   - 10ms frames with 5ms overlap
   - 12 MFCCs with 26 filter banks
@@ -74,8 +71,8 @@ def mfcc_features(filename):
 
   mfccs[0] = energy # replace first MFCC with energy, per convention
 
-  deltas = librosa.feature.delta(mfccs, order=1) 
-  mfccs_plus_deltas = np.vstack([mfccs, deltas]) 
+  deltas = librosa.feature.delta(mfccs, order=1)
+  mfccs_plus_deltas = np.vstack([mfccs, deltas])
 
   coeffs = sklearn.preprocessing.scale(mfccs_plus_deltas, axis=1)
 
@@ -86,7 +83,7 @@ def dirpath2dataset(dirpath):
   """Convert a TIMIT dirpath to a dataset.
 
   The filename alone is not unique.
-  
+
   e.g., TIMIT/TRAIN/DR8/MMPM0/SX251.WAV => MMPM0/SX251.WAV
   """
   if not '/' in dirpath:
@@ -183,10 +180,10 @@ def save_feature_dataset(audio_filenames, spectrograms, seq_lens, phoneme2index_
     test = timit.create_group(test_name)
 
     for subset_kind, subset_dataset in [(train_name, train), (test_name, test)]:
-      # (n_examples,) 
+      # (n_examples,)
       subset_dataset.create_dataset('example_paths', dtype="S100", data=np.array(audio_filenames[subset_kind]))
 
-      # (n_examples, max_frames, n_coeffs) 
+      # (n_examples, max_frames, n_coeffs)
       subset_dataset.create_dataset('spectrograms', data=spectrograms[subset_kind])
 
       # (n_examples,)
@@ -231,7 +228,7 @@ def build_spectrogram_array(features_list, n_examples, max_frames, n_coeffs):
 
 def load_transcriptions(audio_filenames):
   """Load list of phoneme transcriptions.
-  
+
   Each phoneme transcription is a list of phonemes without time alignments.
   """
   phoneme_ext = ".PHN"

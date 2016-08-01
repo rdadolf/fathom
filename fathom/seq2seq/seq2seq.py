@@ -3,7 +3,6 @@ import tensorflow as tf
 import numpy as np
 
 import math
-import os
 import random
 import sys
 import time
@@ -238,9 +237,6 @@ class Seq2Seq(NeuralNetworkModel):
   def run(self, runstep=None, n_steps=1):
     # Grab the dataset from the internet, if necessary
     self.load_data()
-
-    values = tf.RunMetadata()
-    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
 
     # This is the training loop.
     step_time, loss = 0.0, 0.0

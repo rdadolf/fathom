@@ -1,0 +1,140 @@
+# Largely based on the pylint default configuration.
+# pylint --generate-rcfile
+
+[MASTER]
+ignore=CVS
+persistent=no
+load-plugins=
+jobs=1
+unsafe-load-any-extension=no
+extension-pkg-whitelist=
+optimize-ast=no
+
+[MESSAGES CONTROL]
+disable=all
+# Full list at https://pylint.readthedocs.io/en/latest/features.html
+enable=
+  # 2 spaces. I don't care what PEP8 says.
+  bad-indentation,mixed-indentation,
+  # keeps things clean
+  unused-import,unused-variable,
+  # I'm needlessly inconsistent about this.
+  wrong-import-order,
+  # No need for old-style classes, and I sometimes rely on new-style ones. So make everything new.
+  old-style-class,
+  # There's almost always a better way.
+  dangerous-default-value,
+  # I should probably just automatically fix this...
+  trailing-whitespace,
+  # Prudent.
+  arguments-differ,
+
+[REPORTS]
+# Defaults
+output-format=text
+files-output=no
+reports=yes
+evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+#msg-template=
+
+[BASIC]
+# List of builtins function names that should not be used
+bad-functions=input
+# Good/bad variable names which should always/never be accepted
+good-names=i,j,k,ex,Run,_
+bad-names=
+
+function-rgx=[a-z_][a-z0-9_]{2,30}$
+function-name-hint=[a-z_][a-z0-9_]{2,30}$
+variable-rgx=[a-z_][a-z0-9_]{2,30}$
+variable-name-hint=[a-z_][a-z0-9_]{2,30}$
+const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
+const-name-hint=(([A-Z_][A-Z0-9_]*)|(__.*__))$
+attr-rgx=[a-z_][a-z0-9_]{2,30}$
+attr-name-hint=[a-z_][a-z0-9_]{2,30}$
+argument-rgx=[a-z_][a-z0-9_]{2,30}$
+argument-name-hint=[a-z_][a-z0-9_]{2,30}$
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
+class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{2,30}|(__.*__))$
+inlinevar-rgx=[A-Za-z_][A-Za-z0-9_]*$
+inlinevar-name-hint=[A-Za-z_][A-Za-z0-9_]*$
+class-rgx=[A-Z_][a-zA-Z0-9]+$
+class-name-hint=[A-Z_][a-zA-Z0-9]+$
+module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+module-name-hint=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+method-rgx=[a-z_][a-z0-9_]{2,30}$
+method-name-hint=[a-z_][a-z0-9_]{2,30}$
+no-docstring-rgx=^_
+docstring-min-length=-1
+
+[ELIF]
+# Maximum number of nested blocks for function / method body
+max-nested-blocks=5
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=80
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+single-line-if-stmt=no
+no-space-check=trailing-comma,dict-separator
+max-module-lines=1000
+indent-string='  '
+# Number of spaces of indent required inside a hanging  or continued line.
+indent-after-paren=2
+expected-line-ending-format=
+
+[LOGGING]
+# Logging modules to check that the string format arguments are in logging
+# function parameter format
+logging-modules=logging
+
+[MISCELLANEOUS]
+# List of note tags to take in consideration, separated by a comma.
+notes=FIXME,XXX,TODO
+
+[SIMILARITIES]
+min-similarity-lines=4
+ignore-comments=yes
+ignore-docstrings=yes
+ignore-imports=no
+
+[TYPECHECK]
+ignore-mixin-members=yes
+ignored-modules=
+ignored-classes=
+generated-members=
+
+[VARIABLES]
+# Tells whether we should check for unused import in __init__ files.
+init-import=no
+dummy-variables-rgx=_$
+additional-builtins=
+callbacks=
+
+[CLASSES]
+defining-attr-methods=__init__,__new__
+valid-classmethod-first-arg=cls
+valid-metaclass-classmethod-first-arg=mcs
+exclude-protected=
+
+[DESIGN]
+max-args=1000
+ignored-argument-names=_.*
+max-locals=15
+max-returns=6
+max-branches=12
+max-statements=50
+max-parents=7
+max-attributes=7
+min-public-methods=2
+max-public-methods=20
+max-bool-expr=5
+
+[IMPORTS]
+deprecated-modules=regsub,TERMIOS,Bastion,rexec
+import-graph=
+ext-import-graph=
+int-import-graph=
+
+[EXCEPTIONS]
+overgeneral-exceptions=Exception

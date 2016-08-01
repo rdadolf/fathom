@@ -3,13 +3,7 @@
 import tensorflow as tf
 
 import numpy as np
-import sklearn.preprocessing as prep
-import fathom.imagenet.mnist as input_data
-from nnmodel.frameworks.tf import TFModel, TFFramework
-from fathom.autoenc.autoenc import xavier_init, get_random_block_from_data, standard_scale, AutoencBase
-from fathom.nn import NeuralNetworkModel
-
-from math import sqrt
+from fathom.autoenc.autoenc import xavier_init, AutoencBase
 
 # heavily based on tensorflow.models.autoencoder
 class Autoenc(AutoencBase):

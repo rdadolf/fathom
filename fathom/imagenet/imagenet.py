@@ -4,9 +4,8 @@ import tensorflow as tf
 
 from fathom.nn import NeuralNetworkModel
 from fathom.dataset import Dataset
-import fathom.imagenet.mnist as input_data
 from nnmodel.frameworks.tf import TFFramework
-from fathom.imagenet.image_processing import inputs, distorted_inputs, batch_inputs
+from fathom.imagenet.image_processing import distorted_inputs
 
 # TODO: don't hard-code this
 imagenet_record_dir = '/data/ILSVRC2012/imagenet-tfrecord/'
@@ -52,7 +51,7 @@ class ImagenetModel(NeuralNetworkModel):
       # TODO: configure image_size in image_processing.py
       self.image_size = 224 # side of the square image
       self.channels = 3
-      self.n_input = self.image_size * self.image_size * self.channels 
+      self.n_input = self.image_size * self.image_size * self.channels
 
       self.images = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, self.channels])
 
@@ -104,9 +103,6 @@ class ImagenetModel(NeuralNetworkModel):
     self.num_batches_per_epoch = self.dataset.num_examples_per_epoch() / self.batch_size
 
   def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1):
-    values = tf.RunMetadata()
-    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-
     self.load_data()
 
     with self.G.as_default():
@@ -123,7 +119,7 @@ class ImagenetModel(NeuralNetworkModel):
 
         if not self.forward_only:
           _, loss_value, acc = runstep(
-              self.session, 
+              self.session,
               [self.train, self.loss, self.accuracy],
               feed_dict={self.images: batch_images, self._labels: batch_labels, self.keep_prob: self.dropout},
           )
@@ -132,7 +128,7 @@ class ImagenetModel(NeuralNetworkModel):
             print "Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + "{:.6f}".format(loss_value) + ", Training Accuracy= " + "{:.5f}".format(acc)
         else:
           _ = runstep(
-              self.session, 
+              self.session,
               self.outputs,
               feed_dict={self.images: batch_images, self._labels: batch_labels, self.keep_prob: 1.},
           )

@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 
+from math import sqrt
 import tensorflow as tf
-
-from fathom.nn import NeuralNetworkModel
-import fathom.imagenet.mnist as input_data
 from fathom.imagenet import imagenet
 from nnmodel.frameworks.tf import TFFramework
-
-from math import sqrt
 
 class VGG(imagenet.ImagenetModel):
   """VGG Network."""
@@ -51,19 +47,19 @@ class VGG(imagenet.ImagenetModel):
       pool2 = mpool_op(conv2_2,   name="pool2",   kh=2, kw=2, dh=2, dw=2)
 
       # TODO: VGG pooling in later layers is too aggressive for MNIST
-      using_imagenet = True 
+      using_imagenet = True
       if using_imagenet:
         # block 3 -- outputs 28x28x256
         conv3_1 = conv_op(pool2,    name="conv3_1", kh=3, kw=3, n_out=256, dh=1, dw=1)
         conv3_2 = conv_op(conv3_1,  name="conv3_2", kh=3, kw=3, n_out=256, dh=1, dw=1)
         pool3 = mpool_op(conv3_2,   name="pool3",   kh=2, kw=2, dh=2, dw=2)
-        
+
         # block 4 -- outputs 14x14x512
         conv4_1 = conv_op(pool3,    name="conv4_1", kh=3, kw=3, n_out=512, dh=1, dw=1)
         conv4_2 = conv_op(conv4_1,  name="conv4_2", kh=3, kw=3, n_out=512, dh=1, dw=1)
         conv4_3 = conv_op(conv4_2,  name="conv4_2", kh=3, kw=3, n_out=512, dh=1, dw=1)
         pool4 = mpool_op(conv4_3,   name="pool4",   kh=2, kw=2, dh=2, dw=2)
-        
+
         # block 5 -- outputs 7x7x512
         conv5_1 = conv_op(pool4,    name="conv5_1", kh=3, kw=3, n_out=512, dh=1, dw=1)
         conv5_2 = conv_op(conv5_1,  name="conv5_2", kh=3, kw=3, n_out=512, dh=1, dw=1)
@@ -107,7 +103,7 @@ def conv_op(input_op, name, kw, kh, n_out, dw, dh):
 def fc_op(input_op, name, n_out):
   n_in = input_op.get_shape()[-1].value
 
-  with tf.name_scope(name) as scope:
+  with tf.name_scope(name):
     kernel = tf.Variable(tf.truncated_normal([n_in, n_out], dtype=tf.float32, stddev=0.1), name='w')
     biases = tf.Variable(tf.constant(0.0, shape=[n_out], dtype=tf.float32), name='b')
     activation = tf.nn.relu_layer(input_op, kernel, biases, name=name)

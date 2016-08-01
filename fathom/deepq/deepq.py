@@ -3,19 +3,14 @@
 # (https://github.com/mrkulk/deepQN_tensorflow).
 import tensorflow as tf
 
-from fathom.nn import NeuralNetworkModel
 from nnmodel.frameworks.tf import TFFramework, TFModel
-from abc import ABCMeta, abstractmethod
 
 from database import *
 from emulator import *
 import tensorflow as tf
 import numpy as np
 import time
-from ale_python_interface import ALEInterface
 import cv2
-from scipy import misc
-import thread
 import datetime
 
 # TODO: clean up this file
@@ -118,7 +113,7 @@ class DeepQNetNature(object):
       #self.n2 = tf.nn.lrn(self.o2, 4, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
       #flat
-      o3_shape = self.o3.get_shape().as_list()		
+      o3_shape = self.o3.get_shape().as_list()
 
       #fc3
       layer_name = 'fc4' ; hiddens = 512 ; dim = o3_shape[1]*o3_shape[2]*o3_shape[3]
@@ -193,7 +188,7 @@ class DeepQ(TFModel):
 
   def build_inference(self):
     with self.G.as_default():
-      print 'Building QNet and targetnet...'		
+      print 'Building QNet and targetnet...'
       self.qnet = DeepQNetNature(self.params, self.G)
       self.targetnet = DeepQNetNature(self.params, self.G)
       saver_dict = {'qw1':self.qnet.w1,'qb1':self.qnet.b1,
@@ -212,14 +207,14 @@ class DeepQ(TFModel):
 
       self.saver = tf.train.Saver(saver_dict)
       #self.saver = tf.train.Saver()
-      
+
       self.cp_ops = [
         self.targetnet.w1.assign(self.qnet.w1),self.targetnet.b1.assign(self.qnet.b1),
         self.targetnet.w2.assign(self.qnet.w2),self.targetnet.b2.assign(self.qnet.b2),
         self.targetnet.w3.assign(self.qnet.w3),self.targetnet.b3.assign(self.qnet.b3),
         self.targetnet.w4.assign(self.qnet.w4),self.targetnet.b4.assign(self.qnet.b4),
         self.targetnet.w5.assign(self.qnet.w5),self.targetnet.b5.assign(self.qnet.b5)]
-    
+
       if self.params['ckpt_file'] is not None:
         print 'loading checkpoint : ' + self.params['ckpt_file']
         self.saver.restore(self.sess,self.params['ckpt_file'])
@@ -253,7 +248,7 @@ class DeepQ(TFModel):
 
   def reset_game(self):
     self.state_proc = np.zeros((84,84,4)); self.action = -1; self.terminal = False; self.reward = 0
-    self.state = self.engine.newGame()		
+    self.state = self.engine.newGame()
     self.state_resized = cv2.resize(self.state,(84,110))
     self.state_gray = cv2.cvtColor(self.state_resized, cv2.COLOR_BGR2GRAY)
     self.state_gray_old = None
@@ -271,8 +266,8 @@ class DeepQ(TFModel):
       self.train_cnt_for_disp = 0
     self.step_eval = 0
     self.epi_reward_eval = 0
-    self.epi_Q_eval = 0		
-    self.num_epi_eval = 0		
+    self.epi_Q_eval = 0
+    self.num_epi_eval = 0
     self.total_reward_eval = 0
     self.total_Q_eval = 0
 
@@ -281,9 +276,9 @@ class DeepQ(TFModel):
       if np.random.rand() > self.params['eps']:
         #greedy with random tie-breaking
         if not self.forward_only:
-          Q_pred = self.sess.run(self.qnet.y, feed_dict = {self.qnet.x: np.reshape(st, (1,84,84,4))})[0] 
+          Q_pred = self.sess.run(self.qnet.y, feed_dict = {self.qnet.x: np.reshape(st, (1,84,84,4))})[0]
         else:
-          Q_pred = runstep(self.sess, self.qnet.y, feed_dict = {self.qnet.x: np.reshape(st, (1,84,84,4))})[0] 
+          Q_pred = runstep(self.sess, self.qnet.y, feed_dict = {self.qnet.x: np.reshape(st, (1,84,84,4))})[0]
 
         a_winner = np.argwhere(Q_pred == np.amax(Q_pred))
         if len(a_winner) > 1:
@@ -303,27 +298,24 @@ class DeepQ(TFModel):
 
   def get_onehot(self,actions):
     actions_onehot = np.zeros((self.params['batch'], self.params['num_act']))
-    
+
     for i in range(self.params['batch']):
       actions_onehot[i,int(actions[i])] = 1
     return actions_onehot
 
   def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1):
-    values = tf.RunMetadata()
-    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-
     self.s = time.time()
     print self.params
     print 'Start training!'
     print 'Collecting replay memory for ' + str(self.params['train_start']) + ' steps'
 
     with self.G.as_default():
-      while self.step < (self.params['steps_per_epoch'] * self.params['num_epochs'] * self.params['learning_interval'] + self.params['train_start']):	
-        if not self.forward_only: 
+      while self.step < (self.params['steps_per_epoch'] * self.params['num_epochs'] * self.params['learning_interval'] + self.params['train_start']):
+        if not self.forward_only:
           if self.step >= n_steps:
             return
           if self.DB.get_size() >= self.params['train_start'] : self.step += 1 ; self.steps_train += 1
-        else: 
+        else:
           if self.step_eval >= n_steps:
             return
           self.step_eval += 1
@@ -336,17 +328,17 @@ class DeepQ(TFModel):
 
         if not self.forward_only and self.step % self.params['learning_interval'] == 0 and self.DB.get_size() > self.params['train_start'] :
           bat_s,bat_a,bat_t,bat_n,bat_r = self.DB.get_batches()
-          bat_a = self.get_onehot(bat_a)	
-          
+          bat_a = self.get_onehot(bat_a)
+
           if self.params['copy_freq'] > 0 :
             feed_dict={self.targetnet.x: bat_n}
             q_t = self.sess.run(self.targetnet.y,feed_dict=feed_dict)
           else:
             feed_dict={self.qnet.x: bat_n}
             q_t = self.sess.run(self.qnet.y,feed_dict=feed_dict)
-                                  
+
           q_t = np.amax(q_t,axis=1)
-                                          
+
           feed_dict={self.qnet.x: bat_s, self.qnet.q_t: q_t, self.qnet.actions: bat_a, self.qnet.terminals:bat_t, self.qnet.rewards: bat_r}
 
           # NOTE: we only runstep the Qnet
@@ -355,7 +347,7 @@ class DeepQ(TFModel):
           self.total_cost_train += np.sqrt(self.cost)
           self.train_cnt_for_disp += 1
 
-        if not self.forward_only:				
+        if not self.forward_only:
           self.params['eps'] = max(self.params['eps_min'],1.0 - float(self.train_cnt * self.params['learning_interval'])/float(self.params['eps_step']))
         else:
           self.params['eps'] = 0.05
@@ -366,14 +358,14 @@ class DeepQ(TFModel):
           sys.stdout.write('$$$ Model saved : %s\n\n' % ('ckpt/model_'+self.params['network_type']+'_'+str(save_idx)))
           sys.stdout.flush()
 
-        if not self.forward_only and self.step > 0 and self.step % self.params['eval_freq'] == 0 and self.DB.get_size() > self.params['train_start'] : 
+        if not self.forward_only and self.step > 0 and self.step % self.params['eval_freq'] == 0 and self.DB.get_size() > self.params['train_start']:
           self.reset_game()
           if self.step % self.params['steps_per_epoch'] == 0 : self.reset_statistics('all')
           else: self.reset_statistics('eval')
           self.forward_only = True
-          #TODO : add video recording				
+          #TODO : add video recording
           continue
-        if not self.forward_only and self.step > 0 and self.step % self.params['steps_per_epoch'] == 0 and self.DB.get_size() > self.params['train_start']: 
+        if not self.forward_only and self.step > 0 and self.step % self.params['steps_per_epoch'] == 0 and self.DB.get_size() > self.params['train_start']:
           self.reset_game()
           self.reset_statistics('all')
           #self.forward_only = True
@@ -385,14 +377,14 @@ class DeepQ(TFModel):
           self.forward_only = False
           continue
 
-        if self.terminal:  
+        if self.terminal:
           self.reset_game()
-          if not self.forward_only : 
-            self.num_epi_train += 1 
+          if not self.forward_only:
+            self.num_epi_train += 1
             self.total_reward_train += self.epi_reward_train
             self.epi_reward_train = 0
-          else : 
-            self.num_epi_eval += 1 
+          else:
+            self.num_epi_eval += 1
             self.total_reward_eval += self.epi_reward_eval
             self.epi_reward_eval = 0
           continue
@@ -401,7 +393,7 @@ class DeepQ(TFModel):
         self.state, self.reward, self.terminal = self.engine.next(self.action)
         self.reward_scaled = self.reward // max(1,abs(self.reward))
         if not self.forward_only : self.epi_reward_train += self.reward ; self.total_Q_train += self.maxQ
-        else : self.epi_reward_eval += self.reward ; self.total_Q_eval += self.maxQ	
+        else : self.epi_reward_eval += self.reward ; self.total_Q_eval += self.maxQ
 
         self.state_gray_old = np.copy(self.state_gray)
         self.state_proc[:,:,0:3] = self.state_proc[:,:,1:4]
@@ -421,7 +413,7 @@ class DeepQ(TFModel):
 
   @property
   def labels(self):
-    return 
+    return
 
   @property
   def inputs(self):
