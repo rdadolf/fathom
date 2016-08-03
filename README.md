@@ -1,4 +1,4 @@
-# Fathom
+![Fathom: Reference Workloads for Modern Deep Learning](/fathom.png?raw=true)
 
 [![build status](https://travis-ci.org/rdadolf/fathom.svg?branch=master)](https://travis-ci.org/rdadolf/fathom)
 
