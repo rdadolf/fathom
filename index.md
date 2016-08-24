@@ -4,7 +4,8 @@ layout: titlecard
 ---
 
 <img src="assets/fathom.png" class="img-responsive center-block" alt="Fathom">
-----
+
+<hr>
 
 ## We're on the way!
 
