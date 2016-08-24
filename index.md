@@ -3,7 +3,7 @@ title: Fathom: Reference Workloads for Modern Deep Learning
 layout: titlecard
 ---
 
-<img src="../assets/fathom.png" class="img-responsive center-block" alt="Fathom">
+<img src="assets/fathom.png" class="img-responsive center-block" alt="Fathom">
 ----
 ##We're on the way!
 
