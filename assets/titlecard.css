@@ -1,0 +1,24 @@
+body {
+  font-weight: 200;
+  font-family: 'Open Sans', sans-serif;
+  padding-bottom: 70px; // For footer
+}
+
+div.jumbotron {
+  margin-top: 100px;
+  margin-bottom: 100px;
+  background: white;
+  border: 1px black;
+}
+
+h2 {
+  font-weight: 200;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  min-height: 70px;
+}
