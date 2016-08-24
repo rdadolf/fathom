@@ -1,5 +1,5 @@
 ---
-title: Fathom: Reference Workloads for Modern Deep Learning
+title: Fathom - Reference Workloads for Modern Deep Learning
 layout: titlecard
 ---
 
