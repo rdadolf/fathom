@@ -1,110 +1,69 @@
 #!/usr/bin/env python
 import tensorflow as tf
 
-from fathom.imagenet import imagenet
-from nnmodel.frameworks.tf import TFFramework
+from fathom.util import FathomModel, Imagenet, runstep
 
-def conv2d(name, l_input, w, b):
-  return tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(l_input, w, strides=[1, 1, 1, 1], padding='SAME'),b), name=name)
+# FIXME: put this into LICENSE file
+"""Based on Aymeric Damien's TensorFlow example of AlexNet."""
 
-def max_pool(name, l_input, k):
-  return tf.nn.max_pool(l_input, ksize=[1, k, k, 1], strides=[1, k, k, 1], padding='SAME', name=name)
 
-def norm(name, l_input, lsize=4):
-  return tf.nn.lrn(l_input, lsize, bias=1.0, alpha=0.001 / 9.0, beta=0.75, name=name)
+def conv2d(inputs, weight, stride, bias):
+  weights = tf.Variable(tf.truncated_normal(weight, dtype=tf.float32, stddev=1.e-1), name='weights')
+  conv = tf.nn.conv2d(inputs, weights, strides=strides)
+  bias = tf.Variable(tf.constant(0.0, shape=bias, dtype=tf.float32), trainable=True, name='biases')
+  return tf.nn.relu(bias)
 
-class AlexNet(imagenet.ImagenetModel):
-  """Based on Aymeric Damien's TensorFlow example of AlexNet."""
-  def build_inference(self, images):
+def maxpool(inputs, kernel, stride):
+  return tf.nn.max_pool(inputs, ksize=kernel, strides=stride, padding='VALID', name='maxpool')
+
+def lrn(inputs, window=4):
+  return tf.nn.lrn(inputs, window, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
+
+class AlexNet(FathomModel):
+  def __init__(self, opts={}):
+    super(AlexNet, self).__init__(opts)
+    self.images = None
+    self.logits = None
+    self.loss = None
+    self.optimizer = None
+
+    self.learning_rate = 0.001
+    self.training_iters = 200000
+    self.batch_size = opts.get('batch_size', 64)
+    self.dropout = 0.8 # Probability to keep units
+
+    self.forward_only = opts.get('forward_only', False)
+
+  def build_inference_graph(self, images):
+    self.images = images
+
     with self.G.as_default():
-      # conv1
-      with tf.name_scope('conv1') as scope:
-        kernel = tf.Variable(tf.truncated_normal([11, 11, 3, 64], dtype=tf.float32,
-                                                 stddev=1e-1), name='weights')
-        conv = tf.nn.conv2d(images, kernel, [1, 4, 4, 1], padding='SAME')
-        biases = tf.Variable(tf.constant(0.0, shape=[64], dtype=tf.float32),
-                             trainable=True, name='biases')
-        bias = tf.nn.bias_add(conv, biases)
-        conv1 = tf.nn.relu(bias, name=scope)
+      with tf.name_scope('layer1') as scope:
+        conv1 = conv2d(self.images, kernel=[11,11,3,64], stride=[1,4,4,1], bias=[64])
+        pool1 = maxpool(conv1, kernel=[1,3,3,1], stride=[1,2,2,1])
+        norm1 = lrn(pool1, window=4)
 
-      # pool1
-      pool1 = tf.nn.max_pool(conv1,
-                             ksize=[1, 3, 3, 1],
-                             strides=[1, 2, 2, 1],
-                             padding='VALID',
-                             name='pool1')
+      with tf.name_scope('layer2') as scope:
+        conv2 = conv2d(norm1, kernel=[5,5,64,192], stride=[1,1,1,1], bias=[192])
+        pool2 = maxpool(conv2, kernel=[1,3,3,1], stride=[1,2,2,1])
+        norm2 = lrn(pool2, window=4)
 
-      # TODO: lrn1
-      lsize = 4
-      norm1 = tf.nn.lrn(pool1, lsize, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
+      with tf.name_scope('layer3') as scope:
+        conv3 = conv2d(norm2, kernel=[3,3,192,384], stride=[1,1,1,1], bias=[384])
 
-      # conv2
-      with tf.name_scope('conv2') as scope:
-        kernel = tf.Variable(tf.truncated_normal([5, 5, 64, 192], dtype=tf.float32,
-                                                 stddev=1e-1), name='weights')
-        conv = tf.nn.conv2d(norm1, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = tf.Variable(tf.constant(0.0, shape=[192], dtype=tf.float32),
-                             trainable=True, name='biases')
-        bias = tf.nn.bias_add(conv, biases)
-        conv2 = tf.nn.relu(bias, name=scope)
+      with tf.name_scope('layer4') as scope:
+        conv4 = conv2d(conv3, kernel=[3,3,384,256], stride=[1,1,1,1], bias=[256])
 
-      # pool2
-      pool2 = tf.nn.max_pool(conv2,
-                             ksize=[1, 3, 3, 1],
-                             strides=[1, 2, 2, 1],
-                             padding='VALID',
-                             name='pool2')
+      with tf.name_scope('layer5') as scope:
+        conv5 = conv2d(conv4, kernel=[3,3,256,256], stride=[1,1,1,1], bias=[256])
+        pool5 = maxpool(conv5, kernel=[1,3,3,1], stride=[1,2,2,1])
+        pool5_size = np.prod(pool5.get_shape().as_list())
 
-      norm2 = tf.nn.lrn(pool2, lsize, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
-
-      # conv3
-      with tf.name_scope('conv3') as scope:
-        kernel = tf.Variable(tf.truncated_normal([3, 3, 192, 384],
-                                                 dtype=tf.float32,
-                                                 stddev=1e-1), name='weights')
-        conv = tf.nn.conv2d(norm2, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = tf.Variable(tf.constant(0.0, shape=[384], dtype=tf.float32),
-                             trainable=True, name='biases')
-        bias = tf.nn.bias_add(conv, biases)
-        conv3 = tf.nn.relu(bias, name=scope)
-
-      # conv4
-      with tf.name_scope('conv4') as scope:
-        kernel = tf.Variable(tf.truncated_normal([3, 3, 384, 256],
-                                                 dtype=tf.float32,
-                                                 stddev=1e-1), name='weights')
-        conv = tf.nn.conv2d(conv3, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = tf.Variable(tf.constant(0.0, shape=[256], dtype=tf.float32),
-                             trainable=True, name='biases')
-        bias = tf.nn.bias_add(conv, biases)
-        conv4 = tf.nn.relu(bias, name=scope)
-
-      # conv5
-      with tf.name_scope('conv5') as scope:
-        kernel = tf.Variable(tf.truncated_normal([3, 3, 256, 256],
-                                                 dtype=tf.float32,
-                                                 stddev=1e-1), name='weights')
-        conv = tf.nn.conv2d(conv4, kernel, [1, 1, 1, 1], padding='SAME')
-        biases = tf.Variable(tf.constant(0.0, shape=[256], dtype=tf.float32),
-                             trainable=True, name='biases')
-        bias = tf.nn.bias_add(conv, biases)
-        conv5 = tf.nn.relu(bias, name=scope)
-
-      # pool5
-      pool5 = tf.nn.max_pool(conv5,
-                             ksize=[1, 3, 3, 1],
-                             strides=[1, 2, 2, 1],
-                             padding='VALID',
-                             name='pool5')
-
-      pool5_shape = pool5.get_shape().as_list()
-      pool5_length = pool5_shape[1] * pool5_shape[2] * pool5_shape[3]
-
-      wd1 = tf.Variable(tf.random_normal([pool5_length, 4096]))
+      # Fully-connected layers
+      flat_pool5 = tf.reshape(pool5, [self.batch_size, pool5_length])
+      wd1 = tf.Variable(tf.random_normal([pool5_size, 4096]))
       bd1 = tf.Variable(tf.random_normal([4096]))
-
-      flattened_pool5 = tf.reshape(pool5, [self.batch_size, pool5_length])
-      dense1 = tf.nn.relu(tf.nn.xw_plus_b(flattened_pool5, wd1, bd1), name='fc1')
+      dense1 = tf.nn.relu(tf.nn.xw_plus_b(flat_pool5, wd1, bd1), name='fc1')
 
       wd2 = tf.Variable(tf.random_normal([4096, 4096]))
       bd2 = tf.Variable(tf.random_normal([4096]))
@@ -117,25 +76,41 @@ class AlexNet(imagenet.ImagenetModel):
 
     return self.logits
 
-  def build_hyperparameters(self):
-    self.learning_rate = 0.001
-    self.training_iters = 200000
-    self.batch_size = 64
-    if self.init_options:
-      self.batch_size = self.init_options.get('batch_size', self.batch_size)
-    self.display_step = 1
+  def build_training_graph(self, labels):
+    with self.G.as_default():
+      self.loss = tf.reduce_mean(tf.nn.sparse_sotfmax_cross_entropy_with_logits(self.logits, labels)
+      self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
-    self.dropout = 0.8 # Dropout, probability to keep units
+    return self.loss, self.optimizer
 
-    # TODO: can this not be a placeholder?
-    self.keep_prob = tf.placeholder(tf.float32) # dropout (keep probability)
+  def build(self):
+    (images, labels ) = (None,None) # FIXME load ImageNet data
+    self.build_inference_graph( images )
+    if not self.forward_only:
+      self.build_training_graph( labels )
+
+  def run(self, runstep=runstep, nsteps=10):
+    # FIXME: load data here?
+    with self.G.as_default():
+      for i in range(0,nsteps):
+        batch_images, batch_labels = # FIXME: create minibatch
+
+        _, loss = runstep(self.session,
+          [self.optimizer, self.loss],
+          {self.images: batch_images, self.labels: batch_labels} )
+
+  def inputs(self):
+    return self.images
+
+  def outputs(self):
+    return self.logits
 
 class AlexNetFwd(AlexNet):
-  forward_only = True
+  self.forward_only = True
 
 if __name__=='__main__':
   m = AlexNet()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run()
   m.teardown()
 
