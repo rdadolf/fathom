@@ -13,7 +13,6 @@ import time
 import cv2
 import datetime
 
-# TODO: clean up this file
 nature_params = {
   'game': 'breakout',
   'window_name': "NNModel: Deep Q-Learning for Atari",
@@ -363,7 +362,6 @@ class DeepQ(TFModel):
           if self.step % self.params['steps_per_epoch'] == 0 : self.reset_statistics('all')
           else: self.reset_statistics('eval')
           self.forward_only = True
-          #TODO : add video recording
           continue
         if not self.forward_only and self.step > 0 and self.step % self.params['steps_per_epoch'] == 0 and self.DB.get_size() > self.params['train_start']:
           self.reset_game()

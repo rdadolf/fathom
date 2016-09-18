@@ -73,7 +73,6 @@ class MemNet(NeuralNetworkModel):
     with self.G.as_default():
       with tf.name_scope('loss'):
         # Define loss
-        # TODO: does this labels have unexpected state?
         self.loss_op = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits, tf.cast(labels, tf.float32)))
     return self.loss_op
 
@@ -105,7 +104,6 @@ class MemNet(NeuralNetworkModel):
 
   def load_data(self):
     # single babi task
-    # TODO: refactor all this running elsewhere
     # task data
     train, test = load_task(data_dir, task_id)
 
@@ -128,7 +126,7 @@ class MemNet(NeuralNetworkModel):
 
     # train/validation/test sets
     self.S, self.Q, self.A = vectorize_data(train, word_idx, self.sentence_size, self.memory_size)
-    self.trainS, self.valS, self.trainQ, self.valQ, self.trainA, self.valA = cross_validation.train_test_split(self.S, self.Q, self.A, test_size=.1) # TODO: randomstate
+    self.trainS, self.valS, self.trainQ, self.valQ, self.trainA, self.valA = cross_validation.train_test_split(self.S, self.Q, self.A, test_size=.1)
     self.testS, self.testQ, self.testA = vectorize_data(test, word_idx, self.sentence_size, self.memory_size)
 
     print(self.testS[0])
@@ -146,7 +144,6 @@ class MemNet(NeuralNetworkModel):
 
   def build_hyperparameters(self):
     with self.G.as_default():
-      # TODO: put these into runstep options or somewhere else
       # Parameters
       self.learning_rate = 0.01
       self.batch_size = 32
@@ -160,7 +157,7 @@ class MemNet(NeuralNetworkModel):
       self.display_step = 10
 
   def build_inputs(self):
-    self.load_data() # TODO: get static numbers for the things that currently require loading and move this to run
+    self.load_data()
 
     with self.G.as_default():
       # inputs
@@ -182,12 +179,6 @@ class MemNet(NeuralNetworkModel):
     return self.answers
 
   def run(self, runstep=None, n_steps=1):
-    # load babi data
-    # vocab, memory, sentence sizes set here
-    # TODO: get static data size numbers and don't load in inputs anymore
-    #self.load_data()
-    #tf.set_random_seed(random_state)
-
     start = 0
     assert self.batch_size<self.n_train, 'Batch size is larger than training data---something is horribly wrong'
     end = self.batch_size

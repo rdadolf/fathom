@@ -8,7 +8,6 @@ from nnmodel.frameworks.tf import TFFramework
 class VGG(imagenet.ImagenetModel):
   """VGG Network."""
   def build_hyperparameters(self):
-    # TODO: put these into runstep options or somewhere else
     # Parameters
     self.learning_rate = 0.0001
     self.training_iters = 200000
@@ -46,7 +45,6 @@ class VGG(imagenet.ImagenetModel):
       conv2_2 = conv_op(conv2_1,  name="conv2_2", kh=3, kw=3, n_out=128, dh=1, dw=1)
       pool2 = mpool_op(conv2_2,   name="pool2",   kh=2, kw=2, dh=2, dw=2)
 
-      # TODO: VGG pooling in later layers is too aggressive for MNIST
       using_imagenet = True
       if using_imagenet:
         # block 3 -- outputs 28x28x256
@@ -85,7 +83,6 @@ class VGG(imagenet.ImagenetModel):
     return self.logits
 
 # crudely based on https://github.com/huyng/tensorflow-vgg
-# TODO: refactor these utility functions across convnet models to remove dependencies
 def conv_op(input_op, name, kw, kh, n_out, dw, dh):
   n_in = input_op.get_shape()[-1].value
 

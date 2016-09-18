@@ -48,7 +48,6 @@ class ImagenetModel(NeuralNetworkModel):
 
   def build_inputs(self):
     with self.G.as_default():
-      # TODO: configure image_size in image_processing.py
       self.image_size = 224 # side of the square image
       self.channels = 3
       self.n_input = self.image_size * self.image_size * self.channels
@@ -66,7 +65,7 @@ class ImagenetModel(NeuralNetworkModel):
 
   def build_evaluation(self):
     """Evaluation metrics (e.g., accuracy)."""
-    self.correct_pred = tf.equal(tf.argmax(self.outputs, 1), self.labels) # TODO: off-by-one?
+    self.correct_pred = tf.equal(tf.argmax(self.outputs, 1), self.labels)
     self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
   def build_hyperparameters(self):
@@ -78,13 +77,11 @@ class ImagenetModel(NeuralNetworkModel):
 
       self.dropout = 0.8 # Dropout, probability to keep units
 
-    # TODO: can this not be a placeholder?
     self.keep_prob = tf.placeholder(tf.float32) # dropout (keep probability)
 
   def build_loss(self, logits, labels):
     with self.G.as_default():
       # Define loss
-      # TODO: does this labels have unexpected state?
       self.loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels))
     return self.loss_op
 
@@ -112,7 +109,6 @@ class ImagenetModel(NeuralNetworkModel):
         if step > n_steps:
           return
 
-        # TODO: switch to test
         batch_images, batch_labels = self.session.run([self.batch_images_queue, self.batch_labels_queue])
 
         print("Queued ImageNet batch.")

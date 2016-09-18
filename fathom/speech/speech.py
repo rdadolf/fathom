@@ -43,8 +43,6 @@ class ClippedReluRNNCell(tf.nn.rnn_cell.RNNCell):
     return output, output
 
 
-# TODO: show label error rate
-# TODO: avoid labels and blank off-by-one error due to padding zeros
 class Speech(NeuralNetworkModel):
   """RNN for speech recognition."""
   def __init__(self, device=None, init_options=None):
@@ -94,7 +92,7 @@ class Speech(NeuralNetworkModel):
       return self.loss_op
 
   def build_train(self, loss):
-    # TODO: buckets
+    # no buckets
     with self.G.as_default():
       self.train_op = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(loss)
       return self.train_op
@@ -112,11 +110,9 @@ class Speech(NeuralNetworkModel):
       W_batch_multiples = tf.constant([self.batch_size, 1, 1], dtype=tf.int32)
       W_batch = tf.tile(tf.expand_dims(W, 0), W_batch_multiples)
 
-      # TODO: is tiling a bias vector over batch and frames correct?
       b_batch_multiples = tf.constant([self.batch_size, self.max_frames, 1], dtype=tf.int32)
       b_batch = tf.tile(tf.expand_dims(tf.expand_dims(b, 0), 0), b_batch_multiples)
 
-      # TODO: change batch_matmul to an averaging reshape so that batching happens and dimensions are easier
       outputs = tf.add(tf.batch_matmul(inputs, W_batch), b_batch)
 
       return clipped_relu(outputs)
@@ -137,11 +133,9 @@ class Speech(NeuralNetworkModel):
       istate_fw = tf.placeholder("float", [None, n_hidden])
       istate_bw = tf.placeholder("float", [None, n_hidden])
 
-      # TODO: support both tanh (default) and clipped_relu
       # outputs, output_state_fw, output_state_bw
       outputs, _, _ = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
 
-      # TODO: is this the right output?
       return outputs[-1]
 
   def ctc_label_dense_to_sparse( self, labels, label_lengths ):
@@ -170,7 +164,7 @@ class Speech(NeuralNetworkModel):
 
   def build_hyperparameters(self):
     self.n_labels = 61 + 1 # add blank
-    self.max_frames = 1566 # TODO: compute dynamically
+    self.max_frames = 1566
     self.max_labels = 75
     self.n_coeffs = 26
     self.batch_size = 32
@@ -204,7 +198,6 @@ class Speech(NeuralNetworkModel):
 
   def load_data(self):
     self.train_spectrograms, self.train_labels, self.train_seq_lens = load_timit(timit_hdf5_filepath, train=True)
-    # TODO: load test
 
   def get_random_batch(self):
     """Get random batch from np.arrays (not tf.train.shuffle_batch)."""
@@ -214,7 +207,6 @@ class Speech(NeuralNetworkModel):
 
   def decoding(self):
     """Predict labels from learned sequence model."""
-    # TODO: label error rate on validation set
     decoded, _ = tf.contrib.ctc.ctc_greedy_decoder(self.logits_t, self.seq_lens)
     sparse_decode_op = decoded[0] # single-element list
     self.decode_op = tf.sparse_to_dense(sparse_decode_op.indices, sparse_decode_op.shape, sparse_decode_op.values)
@@ -246,7 +238,6 @@ class Speech(NeuralNetworkModel):
         # print some decoded examples
         if False:
           print(' '.join(self.labels2phonemes(decoded[0])))
-          # TODO: fix dtypes in dataset (labels are accidentally floats right now)
           print(' '.join(self.labels2phonemes(np.array(label_batch[0,:], dtype=np.int32))))
 
   def labels2phonemes(self, decoded_labels):

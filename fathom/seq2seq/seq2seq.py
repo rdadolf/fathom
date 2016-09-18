@@ -117,12 +117,10 @@ class Seq2Seq(NeuralNetworkModel):
 
   def build_loss(self, logits, labels):
     with self.G.as_default():
-      # TODO: how to handle this in seq2seq? refactoring needed
       self.loss_op = self.losses
     return self.losses
 
   def build_train(self, losses):
-    # TODO: modify total_loss to handle buckets
     self.updates = None
     with self.G.as_default():
       # Gradients and SGD update operation for training the model.
@@ -142,7 +140,6 @@ class Seq2Seq(NeuralNetworkModel):
     return self.updates # note: this is per-bucket
 
   def load_data(self):
-    # TODO: make configurable
     self.data_dir = "/data/WMT15/"
 
     print("Preparing WMT data in %s" % self.data_dir)
@@ -216,7 +213,7 @@ class Seq2Seq(NeuralNetworkModel):
     # Parameters
     self.source_vocab_size = self.en_vocab_size
     self.target_vocab_size = self.fr_vocab_size
-    self.buckets = self._buckets # FIXME: better bucket names
+    self.buckets = self._buckets
     self.num_samples = 512
     self.size = 256
     self.num_layers = 3
@@ -265,7 +262,6 @@ class Seq2Seq(NeuralNetworkModel):
         #options=run_options, run_metadata=values
       )
 
-      # TODO: do this in a runstep
       if not self.forward_only:
         _, step_loss, _ = outputs[1], outputs[2], None  # Gradient norm, loss, no outputs.
       else:
@@ -308,13 +304,8 @@ class Seq2Seq(NeuralNetworkModel):
               #options=run_options, run_metadata=values
             )
 
-            # TODO: do this in a runstep
             if not self.forward_only:
               _, eval_loss, _ = outputs[1], outputs[2], None  # Gradient norm, loss, no outputs.
-
-              if False: # FIXME: remove this temporary
-                eval_ppx = math.exp(eval_loss) if eval_loss < 300 else float('inf')
-                print("  eval: bucket %d perplexity %.2f" % (bucket_id, eval_ppx))
             else:
               _, eval_loss, _ = None, outputs[0], outputs[1:]  # No gradient norm, loss, outputs.
 

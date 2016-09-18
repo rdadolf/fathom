@@ -55,7 +55,7 @@ def mfcc_features(filename):
   Properties:
   - 10ms frames with 5ms overlap
   - 12 MFCCs with 26 filter banks
-  - replace first MFCC with energy (TODO: log-energy)
+  - replace first MFCC with energy
   - add first-order derivatives for all of the above
   - total: 26 coefficients
   """
@@ -65,7 +65,7 @@ def mfcc_features(filename):
 
   mfccs = librosa.feature.mfcc(d, sr, n_mfcc=1+12, n_fft=int(frame_overlap_seconds*sr), hop_length=int(frame_overlap_seconds*sr))
 
-  # energy (TODO: log?)
+  # energy
   energy = librosa.feature.rmse(d, n_fft=int(frame_overlap_seconds*sr), hop_length=int(frame_overlap_seconds*sr))
 
   mfccs[0] = energy # replace first MFCC with energy, per convention
@@ -117,7 +117,7 @@ def compute_spectrograms(audio_filenames):
 
   for audio_basename in tqdm(audio_filenames):
     # recompute spectrogram features
-    # FIXME: on interrupt, kill the thread which librosa launches via audioread
+    # note that librosa launches a thread via audioread
     feature_vector = mfcc_features(audio_basename + audio_ext)
     features_list.append(feature_vector)
 
@@ -127,7 +127,6 @@ def compute_spectrograms(audio_filenames):
 def load_precomputed_spectrograms(filepath):
   """Load precomputed spectrogram features to save time."""
   features_list = []
-  # TODO: this HDF5 group structure is outdated, recompute and save a new one
   with h5py.File(filepath, 'r') as hf:
     for g in hf['utterances']:
       for dataset in hf['utterances'][g]:
@@ -138,7 +137,7 @@ def load_precomputed_spectrograms(filepath):
 
 
 def load_timit(filepath, train=True):
-  # TODO: load test also
+  """Load TIMIT training data."""
   with h5py.File(filepath, 'r') as hf:
     train_spectrograms = np.array(hf['timit']['train']['spectrograms'])
     train_labels = np.array(hf['timit']['train']['labels'])
