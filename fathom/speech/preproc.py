@@ -61,7 +61,6 @@ def mfcc_features(filename):
   """
   d, sr = librosa.load(filename)
 
-  frame_length_seconds = 0.010
   frame_overlap_seconds = 0.005
 
   mfccs = librosa.feature.mfcc(d, sr, n_mfcc=1+12, n_fft=int(frame_overlap_seconds*sr), hop_length=int(frame_overlap_seconds*sr))

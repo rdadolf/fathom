@@ -60,7 +60,7 @@ class Speech(NeuralNetworkModel):
       outputs_2 = self.mlp_layer(outputs_1, self.n_hidden, self.n_hidden)
       outputs_3 = self.mlp_layer(outputs_2, self.n_hidden, self.n_hidden)
       outputs_4 = self.bidirectional_layer(outputs_3, n_input=self.n_hidden, n_hidden=self.n_hidden, n_output=self.n_hidden)
-      outputs_5 = self.mlp_layer(outputs_3, self.n_hidden, self.n_labels)
+      outputs_5 = self.mlp_layer(outputs_4, self.n_hidden, self.n_labels)
 
       self._outputs = outputs_5
 
@@ -138,7 +138,8 @@ class Speech(NeuralNetworkModel):
       istate_bw = tf.placeholder("float", [None, n_hidden])
 
       # TODO: support both tanh (default) and clipped_relu
-      outputs, output_state_fw, output_state_bw = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
+      # outputs, output_state_fw, output_state_bw
+      outputs, _, _ = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
 
       # TODO: is this the right output?
       return outputs[-1]
