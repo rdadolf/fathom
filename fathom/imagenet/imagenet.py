@@ -99,7 +99,7 @@ class ImagenetModel(NeuralNetworkModel):
     # Grab the dataset from the internet, if necessary
     self.num_batches_per_epoch = self.dataset.num_examples_per_epoch() / self.batch_size
 
-  def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1):
+  def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1, verbose=False):
     self.load_data()
 
     with self.G.as_default():
@@ -111,7 +111,8 @@ class ImagenetModel(NeuralNetworkModel):
 
         batch_images, batch_labels = self.session.run([self.batch_images_queue, self.batch_labels_queue])
 
-        print("Queued ImageNet batch.")
+        if verbose:
+          print("Queued ImageNet batch.")
 
         if not self.forward_only:
           _, loss_value, acc = runstep(
@@ -120,7 +121,7 @@ class ImagenetModel(NeuralNetworkModel):
               feed_dict={self.images: batch_images, self._labels: batch_labels, self.keep_prob: self.dropout},
           )
 
-          if step % self.display_step == 0:
+          if step % self.display_step == 0 and verbose:
             print "Iter " + str(step*self.batch_size) + ", Minibatch Loss= " + "{:.6f}".format(loss_value) + ", Training Accuracy= " + "{:.5f}".format(acc)
         else:
           _ = runstep(
@@ -131,4 +132,3 @@ class ImagenetModel(NeuralNetworkModel):
 
         step += 1
 
-      #print "Testing Accuracy:", runstep(self.session, [self.accuracy], feed_dict={self.images: self.mnist.test.images[:256], self._labels: self.mnist.test.labels[:256], self.keep_prob: 1.})

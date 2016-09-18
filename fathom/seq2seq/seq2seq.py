@@ -139,16 +139,18 @@ class Seq2Seq(NeuralNetworkModel):
 
     return self.updates # note: this is per-bucket
 
-  def load_data(self):
+  def load_data(self, verbose=False):
     self.data_dir = "/data/WMT15/"
 
-    print("Preparing WMT data in %s" % self.data_dir)
+    if verbose:
+      print("Preparing WMT data in %s" % self.data_dir)
     en_train, fr_train, en_dev, fr_dev, _, _ = data_utils.prepare_wmt_data(
         self.data_dir, self.en_vocab_size, self.fr_vocab_size)
 
     # Read data into buckets and compute their sizes.
-    print ("Reading development and training data (limit: %d)."
-           % self.max_train_data_size)
+    if verbose:
+      print ("Reading development and training data (limit: %d)."
+             % self.max_train_data_size)
     self.dev_set = self.read_data(en_dev, fr_dev)
     self.train_set = self.read_data(en_train, fr_train, self.max_train_data_size)
     train_bucket_sizes = [len(self.train_set[b]) for b in xrange(len(self._buckets))]
@@ -160,7 +162,7 @@ class Seq2Seq(NeuralNetworkModel):
     self.train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
                            for i in xrange(len(train_bucket_sizes))]
 
-  def read_data(self, source_path, target_path, max_size=None):
+  def read_data(self, source_path, target_path, max_size=None, verbose=False):
     """Read data from source and target files and put into buckets.
 
     Args:
@@ -184,7 +186,7 @@ class Seq2Seq(NeuralNetworkModel):
         counter = 0
         while source and target and (not max_size or counter < max_size):
           counter += 1
-          if counter % 100000 == 0:
+          if counter % 100000 == 0 and verbose:
             print("  reading data line %d" % counter)
             sys.stdout.flush()
           source_ids = [int(x) for x in source.split()]
@@ -231,7 +233,7 @@ class Seq2Seq(NeuralNetworkModel):
       self.learning_rate_decay_op = self.learning_rate.assign(self.learning_rate * self.learning_rate_decay_factor)
       self.max_gradient_norm = 5.0
 
-  def run(self, runstep=None, n_steps=1):
+  def run(self, runstep=None, n_steps=1, verbose=False):
     # Grab the dataset from the internet, if necessary
     self.load_data()
 
@@ -277,9 +279,10 @@ class Seq2Seq(NeuralNetworkModel):
           # Print statistics for the previous epoch.
           perplexity = math.exp(loss) if loss < 300 else float('inf')
           with self.session.as_default():
-            print ("global step %d learning rate %.4f step-time %.2f perplexity "
-                   "%.2f" % (self.global_step.eval(), self.learning_rate.eval(),
-                             step_time, perplexity))
+            if verbose:
+              print ("global step %d learning rate %.4f step-time %.2f perplexity "
+                     "%.2f" % (self.global_step.eval(), self.learning_rate.eval(),
+                               step_time, perplexity))
           # Decrease learning rate if no improvement was seen over last 3 times.
           if len(previous_losses) > 2 and loss > max(previous_losses[-3:]):
             self.session.run(self.learning_rate_decay_op)
@@ -291,7 +294,8 @@ class Seq2Seq(NeuralNetworkModel):
           # Run evals on development set and print their perplexity.
           for bucket_id in xrange(len(self._buckets)):
             if len(self.dev_set[bucket_id]) == 0:
-              print("  eval: empty bucket %d" % (bucket_id))
+              if verbose:
+                print("  eval: empty bucket %d" % (bucket_id))
               continue
             encoder_inputs, decoder_inputs, target_weights = self.get_batch(
                 self.dev_set, bucket_id)
@@ -306,6 +310,9 @@ class Seq2Seq(NeuralNetworkModel):
 
             if not self.forward_only:
               _, eval_loss, _ = outputs[1], outputs[2], None  # Gradient norm, loss, no outputs.
+              if verbose:
+                eval_ppx = math.exp(eval_loss) if eval_loss < 300 else float('inf')
+                print("  eval: bucket %d perplexity %.2f" % (bucket_id, eval_ppx))
             else:
               _, eval_loss, _ = None, outputs[0], outputs[1:]  # No gradient norm, loss, outputs.
 
@@ -346,12 +353,9 @@ class Seq2Seq(NeuralNetworkModel):
     input_feed = {}
     for l in xrange(encoder_size):
       input_feed[self.encoder_inputs[l].name] = encoder_inputs[l]
-      #print("encoder", len(encoder_inputs[l]), self.encoder_inputs[l].get_shape())
     for l in xrange(decoder_size):
       input_feed[self.decoder_inputs[l].name] = decoder_inputs[l]
-      #print("decoder", len(decoder_inputs[l]), self.decoder_inputs[l].get_shape())
       input_feed[self.target_weights[l].name] = target_weights[l]
-      #print("target", len(target_weights[l]), self.target_weights[l].get_shape())
 
     # Since our targets are decoder inputs shifted by one, we need one more.
     #last_target = self.decoder_inputs[decoder_size].name

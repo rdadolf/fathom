@@ -8,7 +8,7 @@ import time
 ROM_PATH = 'models/tf/atari/roms/'
 
 class emulator(object):
-  def __init__(self, rom_name, vis,frameskip=1,windowname='preview'):
+  def __init__(self, rom_name, vis,frameskip=1,windowname='preview', verbose=False):
     self.ale = ALEInterface()
     self.max_frames_per_episode = self.ale.getInt("max_num_frames_per_episode");
     self.ale.setInt("random_seed",123)
@@ -20,9 +20,9 @@ class emulator(object):
     for i in range(len(self.legal_actions)):
       self.action_map[self.legal_actions[i]] = i
 
-    # print(self.legal_actions)
     self.screen_width,self.screen_height = self.ale.getScreenDims()
-    print("width/height: " +str(self.screen_width) + "/" + str(self.screen_height))
+    if verbose:
+      print("width/height: " +str(self.screen_width) + "/" + str(self.screen_height))
     self.vis = vis
     if vis:
       cv2.startWindowThread()

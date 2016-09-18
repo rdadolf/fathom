@@ -212,12 +212,14 @@ class Speech(NeuralNetworkModel):
     self.decode_op = tf.sparse_to_dense(sparse_decode_op.indices, sparse_decode_op.shape, sparse_decode_op.values)
     return self.decode_op
 
-  def run(self, runstep=None, n_steps=1, *args, **kwargs):
-    print("Loading spectrogram features...")
+  def run(self, runstep=None, n_steps=1, verbose=False, *args, **kwargs):
+    if verbose:
+      print("Loading spectrogram features...")
     self.load_data()
 
     with self.G.as_default():
-      print 'Starting run...'
+      if verbose:
+        print('Starting run...')
       for _ in xrange(n_steps):
         spectrogram_batch, label_batch, seq_len_batch = self.get_random_batch()
 
@@ -235,10 +237,9 @@ class Speech(NeuralNetworkModel):
         decoded = self.session.run(self.decode_op,
             feed_dict={self.inputs: spectrogram_batch, self.labels: label_batch, self.seq_lens: seq_len_batch})
 
-        # print some decoded examples
-        if False:
-          print(' '.join(self.labels2phonemes(decoded[0])))
-          print(' '.join(self.labels2phonemes(np.array(label_batch[0,:], dtype=np.int32))))
+        # examples to print some decoded examples
+        # print(' '.join(self.labels2phonemes(decoded[0])))
+        # print(' '.join(self.labels2phonemes(np.array(label_batch[0,:], dtype=np.int32))))
 
   def labels2phonemes(self, decoded_labels):
     """Convert a list of label indices to a list of corresponding phonemes."""

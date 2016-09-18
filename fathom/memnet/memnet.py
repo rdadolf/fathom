@@ -102,7 +102,7 @@ class MemNet(NeuralNetworkModel):
   def train(self):
     return self.train_op
 
-  def load_data(self):
+  def load_data(self, verbose=False):
     # single babi task
     # task data
     train, test = load_task(data_dir, task_id)
@@ -120,27 +120,28 @@ class MemNet(NeuralNetworkModel):
     self.vocab_size = len(word_idx) + 1 # +1 for nil word
     self.sentence_size = max(self.query_size, self.sentence_size) # for the position
 
-    print("Longest sentence length", self.sentence_size)
-    print("Longest story length", self.max_story_size)
-    print("Average story length", self.mean_story_size)
+    if verbose:
+      print("Longest sentence length", self.sentence_size)
+      print("Longest story length", self.max_story_size)
+      print("Average story length", self.mean_story_size)
 
     # train/validation/test sets
     self.S, self.Q, self.A = vectorize_data(train, word_idx, self.sentence_size, self.memory_size)
     self.trainS, self.valS, self.trainQ, self.valQ, self.trainA, self.valA = cross_validation.train_test_split(self.S, self.Q, self.A, test_size=.1)
     self.testS, self.testQ, self.testA = vectorize_data(test, word_idx, self.sentence_size, self.memory_size)
 
-    print(self.testS[0])
-
-    print("Training set shape", self.trainS.shape)
+    if verbose:
+      print("Training set shape", self.trainS.shape)
 
     # params
     self.n_train = self.trainS.shape[0]
     self.n_test = self.testS.shape[0]
     self.n_val = self.valS.shape[0]
 
-    print("Training Size", self.n_train)
-    print("Validation Size", self.n_val)
-    print("Testing Size", self.n_test)
+    if verbose:
+      print("Training Size", self.n_train)
+      print("Validation Size", self.n_val)
+      print("Testing Size", self.n_test)
 
   def build_hyperparameters(self):
     with self.G.as_default():
