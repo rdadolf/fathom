@@ -11,6 +11,7 @@ class FathomModel(object):
     self.threads = None
     self.forward = False
 
+  @abstractmethod # FIXME?
   def build(self):
     with self.G.as_default():
       self.build_graph()

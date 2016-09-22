@@ -60,7 +60,7 @@ class Speech(NeuralNetworkModel):
       outputs_2 = self.mlp_layer(outputs_1, self.n_hidden, self.n_hidden)
       outputs_3 = self.mlp_layer(outputs_2, self.n_hidden, self.n_hidden)
       outputs_4 = self.bidirectional_layer(outputs_3, n_input=self.n_hidden, n_hidden=self.n_hidden, n_output=self.n_hidden)
-      outputs_5 = self.mlp_layer(outputs_3, self.n_hidden, self.n_labels)
+      outputs_5 = self.mlp_layer(outputs_4, self.n_hidden, self.n_labels)
 
       self._outputs = outputs_5
 

@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 import tensorflow as tf
-
 from fathom.util import FathomModel, Imagenet, runstep
 
-# FIXME: put this into LICENSE file
-"""Based on Aymeric Damien's TensorFlow example of AlexNet."""
-
+# Building blocks
 
 def conv2d(inputs, weight, stride, bias):
   weights = tf.Variable(tf.truncated_normal(weight, dtype=tf.float32, stddev=1.e-1), name='weights')
@@ -19,11 +16,12 @@ def maxpool(inputs, kernel, stride):
 def lrn(inputs, window=4):
   return tf.nn.lrn(inputs, window, bias=1.0, alpha=0.001 / 9.0, beta=0.75)
 
+
 class AlexNet(FathomModel):
   def __init__(self, opts={}):
     super(AlexNet, self).__init__(opts)
-    self.images = None
-    self.logits = None
+    self.inputs = None
+    self.outputs = None
     self.loss = None
     self.optimizer = None
 
@@ -34,12 +32,12 @@ class AlexNet(FathomModel):
 
     self.forward_only = opts.get('forward_only', False)
 
-  def build_inference_graph(self, images):
-    self.images = images
+  def build_inference_graph(self, inputs):
+    self.inputs = inputs
 
     with self.G.as_default():
       with tf.name_scope('layer1') as scope:
-        conv1 = conv2d(self.images, kernel=[11,11,3,64], stride=[1,4,4,1], bias=[64])
+        conv1 = conv2d(self.inputs, kernel=[11,11,3,64], stride=[1,4,4,1], bias=[64])
         pool1 = maxpool(conv1, kernel=[1,3,3,1], stride=[1,2,2,1])
         norm1 = lrn(pool1, window=4)
 
@@ -72,20 +70,20 @@ class AlexNet(FathomModel):
       w_out = tf.Variable(tf.random_normal([4096, self.n_classes]))
       b_out = tf.Variable(tf.random_normal([self.n_classes]))
 
-      self.logits = tf.nn.xw_plus_b(dense2, w_out, b_out)
+      self.outputs = tf.nn.xw_plus_b(dense2, w_out, b_out)
 
-    return self.logits
+    return self.outputs
 
   def build_training_graph(self, labels):
     with self.G.as_default():
-      self.loss = tf.reduce_mean(tf.nn.sparse_sotfmax_cross_entropy_with_logits(self.logits, labels)
+      self.loss = tf.reduce_mean(tf.nn.sparse_sotfmax_cross_entropy_with_logits(self.outputs, labels)
       self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate).minimize(self.loss)
 
     return self.loss, self.optimizer
 
   def build(self):
-    (images, labels ) = (None,None) # FIXME load ImageNet data
-    self.build_inference_graph( images )
+    (inputs, labels ) = (None,None) # FIXME load ImageNet data
+    self.build_inference_graph( inputs )
     if not self.forward_only:
       self.build_training_graph( labels )
 
@@ -93,17 +91,11 @@ class AlexNet(FathomModel):
     # FIXME: load data here?
     with self.G.as_default():
       for i in range(0,nsteps):
-        batch_images, batch_labels = # FIXME: create minibatch
+        batch_inputs, batch_labels = # FIXME: create minibatch
 
         _, loss = runstep(self.session,
           [self.optimizer, self.loss],
-          {self.images: batch_images, self.labels: batch_labels} )
-
-  def inputs(self):
-    return self.images
-
-  def outputs(self):
-    return self.logits
+          {self.inputs: batch_inputs, self.labels: batch_labels} )
 
 class AlexNetFwd(AlexNet):
   self.forward_only = True

@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-
-"""Dominique Luna's implementation of End-to-End Memory Networks, refactored."""
-
 from itertools import chain
 import tensorflow as tf
 import numpy as np
@@ -14,12 +11,28 @@ data_dir = "/data/babi/tasks_1-20_v1-2/en/"
 task_id = 1
 
 class MemNet(NeuralNetworkModel):
-  def build_inference(self, inputs):
+  def __init__(self, opts={}):
+    super(Residual, self).__init__(opts)
+    self.inputs = None
+    self.outputs = None
+    self.loss = None
+    self.optimizer = None
+
+    self.learning_rate = 0.01
+    self.batch_size = opts.get('batch_size', 32)
+
+    self.forward_only = opts.get('forward_only', False)
+
+    self.embedding_size = 20
+    self.hops = 3
+    self.max_grad_norm = 40.0
+    self.encoding = position_encoding
+
+  def build_inference_graph(self, inputs):
     with self.G.as_default():
       self.encoding_op = tf.constant(self.encoding(self.sentence_size, self.embedding_size), name="encoding")
 
-      # variables
-      #with tf.variable_scope(self.name):
+      # Most variable names attempt to match those in Sukhbaatar et al., 2015.
       nil_word_slot = tf.zeros([1, self.embedding_size])
       A = tf.concat(0, [ nil_word_slot, self.initializer([self.vocab_size-1, self.embedding_size]) ])
       B = tf.concat(0, [ nil_word_slot, self.initializer([self.vocab_size-1, self.embedding_size]) ])
@@ -31,43 +44,31 @@ class MemNet(NeuralNetworkModel):
       self.H = tf.Variable(self.initializer([self.embedding_size, self.embedding_size]), name="H")
       self.W = tf.Variable(self.initializer([self.embedding_size, self.vocab_size]), name="W")
 
-      #with tf.variable_scope(self.name):
       q_emb = tf.nn.embedding_lookup(self.B, self.queries)
-      u_0 = tf.reduce_sum(q_emb * self.encoding_op, 1)
-      u = [u_0]
+      u_1 = tf.reduce_sum(q_emb * self.encoding_op, 1)
       m_emb = tf.nn.embedding_lookup(self.A, self.stories)
       m = tf.reduce_sum(m_emb * self.encoding_op, 2) + self.TA
 
-      # hop
+      # Generate the memoery layers.
+      u_k = u_1
       for hop_number in range(self.hops):
         with tf.name_scope('Hop_'+str(hop_number)):
-          u_temp = tf.transpose(tf.expand_dims(u[-1], -1), [0, 2, 1])
+          # Hit input memory representation with embedded query
+          u_temp = tf.transpose(tf.expand_dims(u_k, -1), [0, 2, 1])
           dotted = tf.reduce_sum(m * u_temp, 2)
+          p = tf.nn.softmax(dotted)
 
-          # Calculate probabilities
-          probs = tf.nn.softmax(dotted)
-
-          probs_temp = tf.transpose(tf.expand_dims(probs, -1), [0, 2, 1])
+          # Hit output memory with computed probability weights
+          p_temp = tf.transpose(tf.expand_dims(p, -1), [0, 2, 1])
           c_temp = tf.transpose(m, [0, 2, 1])
-          o_k = tf.reduce_sum(c_temp * probs_temp, 2)
+          o_k = tf.reduce_sum(c_temp * p_temp, 2)
 
-          u_k = tf.matmul(u[-1], self.H) + o_k
+          # Linear map to go along with layer-wise weight-tying
+          u_k = tf.matmul(u_k, self.H) + o_k
 
-          # nonlinearity
-          if self.nonlin:
-            u_k = nonlin(u_k)
+      self.outputs = tf.matmul(u_k, self.W)
 
-          u.append(u_k)
-
-      self.nil_vars = set([self.A.name, self.B.name])
-
-      self._outputs = tf.matmul(u_k, self.W)
-
-    return self._outputs
-
-  @property
-  def outputs(self):
-    return self._outputs
+    return self.outputs
 
   def build_loss(self, logits, labels):
     with self.G.as_default():
@@ -75,10 +76,6 @@ class MemNet(NeuralNetworkModel):
         # Define loss
         # TODO: does this labels have unexpected state?
         self.loss_op = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits, tf.cast(labels, tf.float32)))
-    return self.loss_op
-
-  @property
-  def loss(self):
     return self.loss_op
 
   def build_train(self, total_loss):
@@ -91,16 +88,13 @@ class MemNet(NeuralNetworkModel):
       grads_and_vars = [(add_gradient_noise(g), v) for g,v in grads_and_vars]
       nil_grads_and_vars = []
       for g, v in grads_and_vars:
-        if v.name in self.nil_vars:
+        if v.name in set([self.A.name, self.B.name]): # nil vars
           nil_grads_and_vars.append((zero_nil_slot(g), v))
         else:
           nil_grads_and_vars.append((g, v))
 
       self.train_op = self.opt.apply_gradients(nil_grads_and_vars, name="train_op")
 
-    return self.train_op
-  @property
-  def train(self):
     return self.train_op
 
   def load_data(self):
@@ -144,21 +138,6 @@ class MemNet(NeuralNetworkModel):
     print("Validation Size", self.n_val)
     print("Testing Size", self.n_test)
 
-  def build_hyperparameters(self):
-    with self.G.as_default():
-      # TODO: put these into runstep options or somewhere else
-      # Parameters
-      self.learning_rate = 0.01
-      self.batch_size = 32
-      if self.init_options:
-        self.batch_size = self.init_options.get('batch_size', self.batch_size)
-      self.embedding_size = 20
-      self.hops = 3
-      self.max_grad_norm = 40.0
-      self.nonlin = None
-      self.encoding = position_encoding
-      self.display_step = 10
-
   def build_inputs(self):
     self.load_data() # TODO: get static numbers for the things that currently require loading and move this to run
 
@@ -169,17 +148,8 @@ class MemNet(NeuralNetworkModel):
 
       self.initializer = tf.random_normal_initializer(stddev=0.1)
 
-  @property
-  def inputs(self):
-    return self.stories, self.queries
-
-  def build_labels(self):
-    with self.G.as_default():
-      self.answers = tf.placeholder(tf.int32, [None, self.vocab_size], name="answers")
-
-  @property
-  def labels(self):
-    return self.answers
+  def build_training_graph(self, labels):
+    # XXX (old code:) self.answers = tf.placeholder(tf.int32, [None, self.vocab_size], name="answers")
 
   def run(self, runstep=None, n_steps=1):
     # load babi data
@@ -226,9 +196,7 @@ class MemNet(NeuralNetworkModel):
     print("Test accuracy: {:.5f}".format(acc))
 
 def position_encoding(sentence_size, embedding_size):
-  """
-  Position Encoding described in section 4.1 [1]
-  """
+  # Captures word position in sentence representation.
   encoding = np.ones((embedding_size, sentence_size), dtype=np.float32)
   ls = sentence_size+1
   le = embedding_size+1
@@ -250,6 +218,7 @@ def zero_nil_slot(t, name=None):
     z = tf.zeros(tf.pack([1, s]))
     return tf.concat(0, [z, tf.slice(t, [1, 0], [-1, -1])], name=name)
 
+# FIXME: check on the rational for this. Doesn't seem to be in sukhbaatar.
 def add_gradient_noise(t, stddev=1e-3, name=None):
   """
   Adds gradient noise as described in http://arxiv.org/abs/1511.06807 [2].
