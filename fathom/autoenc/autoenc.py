@@ -8,8 +8,6 @@ from fathom.nn import NeuralNetworkModel
 import fathom.imagenet.mnist as input_data
 
 
-# TODO: create an unsupervised parent class
-
 def standard_scale(X_train, X_test):
   preprocessor = prep.StandardScaler().fit(X_train)
   X_train = preprocessor.transform(X_train)
@@ -35,7 +33,6 @@ class AutoencBase(NeuralNetworkModel):
     # Network Parameters
     self.n_hidden = 200
 
-    # TODO: remove this data-specific stuff
     self.n_input = 784 # MNIST data input (img shape: 28*28)
 
     if not self.forward_only:
@@ -54,7 +51,6 @@ class AutoencBase(NeuralNetworkModel):
   def outputs(self):
     return self.reconstruction
 
-  # TODO: remove labels methods upon creating unsupervised parent class
   def build_labels(self):
     # inputs are the ground truth
     pass
@@ -76,8 +72,6 @@ class AutoencBase(NeuralNetworkModel):
         self.epochs = 1
 
       for epoch in xrange(self.epochs):
-        # TODO: re-enable options and metadata, which slow down the run
-
         total_batch = self.mnist.train.num_examples // self.batch_size
 
         avg_cost = 0
@@ -86,8 +80,6 @@ class AutoencBase(NeuralNetworkModel):
             return
           #batch_xs = self.mnist.train.next_batch(self.batch_size)
           batch_xs = get_random_block_from_data(self.X_train, self.batch_size)
-
-          # TODO: summary nodes
 
           if not self.forward_only:
             # train on batch

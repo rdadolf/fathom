@@ -74,7 +74,6 @@ class MemNet(NeuralNetworkModel):
     with self.G.as_default():
       with tf.name_scope('loss'):
         # Define loss
-        # TODO: does this labels have unexpected state?
         self.loss_op = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits, tf.cast(labels, tf.float32)))
     return self.loss_op
 
@@ -97,9 +96,8 @@ class MemNet(NeuralNetworkModel):
 
     return self.train_op
 
-  def load_data(self):
+  def load_data(self, verbose=False):
     # single babi task
-    # TODO: refactor all this running elsewhere
     # task data
     train, test = load_task(data_dir, task_id)
 
@@ -116,30 +114,31 @@ class MemNet(NeuralNetworkModel):
     self.vocab_size = len(word_idx) + 1 # +1 for nil word
     self.sentence_size = max(self.query_size, self.sentence_size) # for the position
 
-    print("Longest sentence length", self.sentence_size)
-    print("Longest story length", self.max_story_size)
-    print("Average story length", self.mean_story_size)
+    if verbose:
+      print("Longest sentence length", self.sentence_size)
+      print("Longest story length", self.max_story_size)
+      print("Average story length", self.mean_story_size)
 
     # train/validation/test sets
     self.S, self.Q, self.A = vectorize_data(train, word_idx, self.sentence_size, self.memory_size)
-    self.trainS, self.valS, self.trainQ, self.valQ, self.trainA, self.valA = cross_validation.train_test_split(self.S, self.Q, self.A, test_size=.1) # TODO: randomstate
+    self.trainS, self.valS, self.trainQ, self.valQ, self.trainA, self.valA = cross_validation.train_test_split(self.S, self.Q, self.A, test_size=.1)
     self.testS, self.testQ, self.testA = vectorize_data(test, word_idx, self.sentence_size, self.memory_size)
 
-    print(self.testS[0])
-
-    print("Training set shape", self.trainS.shape)
+    if verbose:
+      print("Training set shape", self.trainS.shape)
 
     # params
     self.n_train = self.trainS.shape[0]
     self.n_test = self.testS.shape[0]
     self.n_val = self.valS.shape[0]
 
-    print("Training Size", self.n_train)
-    print("Validation Size", self.n_val)
-    print("Testing Size", self.n_test)
+    if verbose:
+      print("Training Size", self.n_train)
+      print("Validation Size", self.n_val)
+      print("Testing Size", self.n_test)
 
   def build_inputs(self):
-    self.load_data() # TODO: get static numbers for the things that currently require loading and move this to run
+    self.load_data()
 
     with self.G.as_default():
       # inputs
@@ -152,12 +151,6 @@ class MemNet(NeuralNetworkModel):
     # XXX (old code:) self.answers = tf.placeholder(tf.int32, [None, self.vocab_size], name="answers")
 
   def run(self, runstep=None, n_steps=1):
-    # load babi data
-    # vocab, memory, sentence sizes set here
-    # TODO: get static data size numbers and don't load in inputs anymore
-    #self.load_data()
-    #tf.set_random_seed(random_state)
-
     start = 0
     assert self.batch_size<self.n_train, 'Batch size is larger than training data---something is horribly wrong'
     end = self.batch_size

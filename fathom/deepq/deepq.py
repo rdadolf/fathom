@@ -13,7 +13,6 @@ import time
 import cv2
 import datetime
 
-# TODO: clean up this file
 nature_params = {
   'game': 'breakout',
   'window_name': "NNModel: Deep Q-Learning for Atari",
@@ -186,9 +185,10 @@ class DeepQ(TFModel):
     with self.G.device(device):
       self.build_inference()
 
-  def build_inference(self):
+  def build_inference(self, verbose=False):
     with self.G.as_default():
-      print 'Building QNet and targetnet...'
+      if verbose:
+        print('Building QNet and targetnet...')
       self.qnet = DeepQNetNature(self.params, self.G)
       self.targetnet = DeepQNetNature(self.params, self.G)
       saver_dict = {'qw1':self.qnet.w1,'qb1':self.qnet.b1,
@@ -203,7 +203,8 @@ class DeepQ(TFModel):
                     'tw5':self.targetnet.w5,'tb5':self.targetnet.b5,
                     'step':self.qnet.global_step}
 
-      print("#ops", len(self.G.get_operations()))
+      if verbose:
+        print("#ops", len(self.G.get_operations()))
 
       self.saver = tf.train.Saver(saver_dict)
       #self.saver = tf.train.Saver()
@@ -216,13 +217,15 @@ class DeepQ(TFModel):
         self.targetnet.w5.assign(self.qnet.w5),self.targetnet.b5.assign(self.qnet.b5)]
 
       if self.params['ckpt_file'] is not None:
-        print 'loading checkpoint : ' + self.params['ckpt_file']
+        if verbose:
+          print('loading checkpoint : ' + self.params['ckpt_file'])
         self.saver.restore(self.sess,self.params['ckpt_file'])
         temp_train_cnt = self.sess.run(self.qnet.global_step)
         temp_step = temp_train_cnt * self.params['learning_interval']
-        print 'Continue from'
-        print '        -> Steps : ' + str(temp_step)
-        print '        -> Minibatch update : ' + str(temp_train_cnt)
+        if verbose:
+          print('Continue from')
+          print('        -> Steps : ' + str(temp_step))
+          print('        -> Minibatch update : ' + str(temp_train_cnt))
 
   def model(self):
     return self.G
@@ -303,11 +306,12 @@ class DeepQ(TFModel):
       actions_onehot[i,int(actions[i])] = 1
     return actions_onehot
 
-  def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1):
+  def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1, verbose=False):
     self.s = time.time()
-    print self.params
-    print 'Start training!'
-    print 'Collecting replay memory for ' + str(self.params['train_start']) + ' steps'
+    if verbose:
+      print(self.params)
+      print('Start training!')
+      print('Collecting replay memory for ' + str(self.params['train_start']) + ' steps')
 
     with self.G.as_default():
       while self.step < (self.params['steps_per_epoch'] * self.params['num_epochs'] * self.params['learning_interval'] + self.params['train_start']):
@@ -323,7 +327,8 @@ class DeepQ(TFModel):
           self.DB.insert(self.state_gray_old[26:110,:],self.reward_scaled,self.action_idx,self.terminal)
 
         if not self.forward_only and self.params['copy_freq'] > 0 and self.step % self.params['copy_freq'] == 0 and self.DB.get_size() > self.params['train_start']:
-          print '&&& Copying Qnet to targetnet\n'
+          if verbose:
+            print('&&& Copying Qnet to targetnet\n')
           self.sess.run(self.cp_ops)
 
         if not self.forward_only and self.step % self.params['learning_interval'] == 0 and self.DB.get_size() > self.params['train_start'] :
@@ -363,7 +368,6 @@ class DeepQ(TFModel):
           if self.step % self.params['steps_per_epoch'] == 0 : self.reset_statistics('all')
           else: self.reset_statistics('eval')
           self.forward_only = True
-          #TODO : add video recording
           continue
         if not self.forward_only and self.step > 0 and self.step % self.params['steps_per_epoch'] == 0 and self.DB.get_size() > self.params['train_start']:
           self.reset_game()
@@ -401,7 +405,8 @@ class DeepQ(TFModel):
         self.state_gray = cv2.cvtColor(self.state_resized, cv2.COLOR_BGR2GRAY)
         self.state_proc[:,:,3] = self.state_gray[26:110,:]/self.params['img_scale']
 
-        print("Finished step {0} ({1})".format(self.step_eval, datetime.datetime.now()))
+        if verbose:
+          print("Finished step {0} ({1})".format(self.step_eval, datetime.datetime.now()))
 
   @property
   def loss(self):

@@ -4,10 +4,7 @@ import tensorflow as tf
 from abc import ABCMeta, abstractmethod, abstractproperty
 from nnmodel.frameworks.tf import TFModel
 
-# TODO: make sure this interface works for both CNNs and RNNs
 # roughly based on TensorFlow CIFAR-10 example
-# TODO: better name?
-# TODO: simplify dev set
 class NeuralNetworkModel(TFModel):
   __metaclass__ = ABCMeta
   forward_only = False
@@ -28,7 +25,6 @@ class NeuralNetworkModel(TFModel):
     with self.G.as_default():
       self.init = tf.initialize_all_variables()
 
-  # TODO: no need to always load whole dataset
   @abstractmethod
   def load_data(self):
     """Load dataset (possibly downloading it)."""
@@ -80,7 +76,6 @@ class NeuralNetworkModel(TFModel):
   def build(self):
     """Build computation graph."""
     with self.G.as_default():
-      # TODO: use the global_step
       self.global_step = tf.Variable(0, trainable=False)
 
       self.build_hyperparameters()

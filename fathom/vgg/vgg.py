@@ -2,6 +2,24 @@
 from math import sqrt
 import tensorflow as tf
 from fathom.util import FathomModel, Imagenet
+from fathom.imagenet import imagenet
+from nnmodel.frameworks.tf import TFFramework
+
+class VGG(imagenet.ImagenetModel):
+  """VGG Network."""
+  def build_hyperparameters(self):
+    # Parameters
+    self.learning_rate = 0.0001
+    self.training_iters = 200000
+    self.batch_size = 8
+    if self.init_options:
+      self.batch_size = self.init_options.get('batch_size', self.batch_size)
+    self.display_step = 1
+
+    if not self.forward_only:
+      self.dropout = 0.8 # Dropout, probability to keep units
+    else:
+      self.dropout = 1.
 
 # Building blocks
 

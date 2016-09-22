@@ -4,8 +4,6 @@ Original Author: Aymeric Damien
 https://github.com/aymericdamien/TensorFlow-Examples/
 """
 
-# TODO: clean up dataset code
-
 from __future__ import print_function
 import gzip
 import os

@@ -60,8 +60,6 @@ class Imagenet(Dataset):
   n_classes = 1001 # one background class
 
   def build_inputs(self, graph):
-    n_inputs = image_size*image_size*image_channels
-    op_images = tf.placeholder(tf.float32, [None, image_size, image_size, channels])
     op_batch_images, op_batch_labels = distorted_inputs(self, batch_size=self.batch_size)
     op_labels = tf.placeholder(tf.int64, [None])
     return (op_inputs, op_labels, op_batch_images, op_batch_labels)
