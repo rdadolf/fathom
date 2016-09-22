@@ -11,45 +11,55 @@ class FathomModel(object):
     self.threads = None
     self.forward = False
 
-  @abstractmethod # FIXME?
-  def build(self):
-    with self.G.as_default():
-      self.build_graph()
-      self.init = tf.initialize_all_variables()
+  @abstractproperty
+  def inputs(self): pass # preprocessed input nodes
+  @abstractproperty
+  def outputs(self): pass # inference output nodes
 
-  def setup(self, setup_options={}):
+  @abstractmethod
+  def build(self): pass
+
+  def setup(self, dataset=None, setup_options={}):
     with self.G.as_default():
-      self.load_data()
       self.session = tf.Session(config=tf.ConfigProto(**setup_options))
       self.coord = tf.train.Coordinator()
+      self.init = tf.initialize_all_variables()
       self.session.run(self.init)
       self.threads = tf.train.start_queue_runners(sess=self.session, coord=self.coord)
-      
+
   @abstractmethod
   def run(self): pass
 
-  def teardown(self):
+  def teardown(self, dataset=None):
     self.coord.request_stop()
     self.coord.join(self.threads, stop_grace_period_secs=10)
     if self.session is not None:
       self.session.close()
       self.session = None
 
-  @abstractmethod
-  def build_graph(self): pass
-  @abstractmethod
-  def load_data(self): pass
-
-  @abstractproperty
-  def inputs(self): pass # preprocessed input nodes
-  @abstractproperty
-  def outputs(self): pass # inference output nodes
+def runstep(session, sink_ops, feed_dict, *args, **kwargs):
+  return session.run(sink_ops, feed_dict, *args, **kwargs)
 
 ################################################################################
 # Datasets Utilities
 
-from dataset import Dataset
 from imagenet_preprocessing import distorted_inputs
+
+class Dataset(object):
+  def load(self):
+    pass
+
+  @abstractproperty
+  def inputs(self):
+    pass
+
+  @abstractproperty
+  def labels(self):
+    pass
+
+  @abstractmethod
+  def batch(self, batchsize=1):
+    pass
 
 class Imagenet(Dataset):
   train_examples_per_epoch = 1281167
@@ -64,4 +74,3 @@ class Imagenet(Dataset):
     op_labels = tf.placeholder(tf.int64, [None])
     return (op_inputs, op_labels, op_batch_images, op_batch_labels)
 
-  

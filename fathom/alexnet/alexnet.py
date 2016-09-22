@@ -81,18 +81,20 @@ class AlexNet(FathomModel):
 
     return self.loss, self.optimizer
 
-  def build(self):
-    (inputs, labels ) = (None,None) # FIXME load ImageNet data
+  def build(self, dataset):
+    dataset.load()
+    # FIXME load ImageNet data
+    (inputs, labels) = (dataset.inputs, dataset.labels)
     self.build_inference_graph( inputs )
     if not self.forward_only:
       self.build_training_graph( labels )
+    self.initialize_all_variables()
 
-  def run(self, runstep=runstep, nsteps=10):
-    # FIXME: load data here?
+  def run(self, dataset, runstep=runstep, nsteps=10):
     with self.G.as_default():
       for i in range(0,nsteps):
-        batch_inputs, batch_labels = # FIXME: create minibatch
-
+        # FIXME: create minibatch
+        batch_inputs, batch_labels = dataset.batch(self.batchsize)
         _, loss = runstep(self.session,
           [self.optimizer, self.loss],
           {self.inputs: batch_inputs, self.labels: batch_labels} )
