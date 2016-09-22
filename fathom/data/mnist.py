@@ -5,6 +5,11 @@ https://github.com/aymericdamien/TensorFlow-Examples/
 """
 
 from __future__ import print_function
+
+from fathom.data.dataset import Dataset
+import sklearn.preprocessing as prep
+
+import numpy as np
 import gzip
 import os
 import urllib
@@ -61,6 +66,7 @@ def extract_labels(filename, one_hot=False):
     if one_hot:
       return dense_to_one_hot(labels)
     return labels
+
 class DataSet(object):
   def __init__(self, images, labels, fake_data=False):
     if fake_data:
@@ -147,3 +153,36 @@ def read_data_sets(train_dir, fake_data=False, one_hot=False):
   data_sets.validation = DataSet(validation_images, validation_labels)
   data_sets.test = DataSet(test_images, test_labels)
   return data_sets
+
+## Fathom code
+def standard_scale(X_train, X_test):
+  preprocessor = prep.StandardScaler().fit(X_train)
+  X_train = preprocessor.transform(X_train)
+  X_test = preprocessor.transform(X_test)
+  return X_train, X_test
+
+def get_random_block_from_data(data, batch_size):
+  """Get random block for batching."""
+  start_index = np.random.randint(0, len(data) - batch_size)
+  return data[start_index:(start_index + batch_size)]
+
+class MnistDataset(Dataset):
+  """Fathom wrapper class."""
+  def __init__(self, batch_size, data_dir="/tmp/data"):
+    self.mnist = read_data_sets(data_dir, one_hot=True)
+    self.X_train, self.X_test = standard_scale(self.mnist.train.images, self.mnist.test.images)
+    self.batch_size = batch_size
+
+  def num_train_examples(self):
+    return 60000
+
+  def num_test_examples(self):
+    return 10000
+
+  def train_test_data(self):
+    """Return (X_train, X_test), the scaled dataset."""
+    return self.X_train, self.X_test
+
+  def next_batch(self):
+      batch_xs = get_random_block_from_data(self.X_train, self.batch_size)
+      return batch_xs

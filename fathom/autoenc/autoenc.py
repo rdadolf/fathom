@@ -5,7 +5,8 @@ import numpy as np
 import sklearn.preprocessing as prep
 import tensorflow as tf
 from fathom.nn import NeuralNetworkModel
-import fathom.imagenet.mnist as input_data
+from fathom.data.mnist import MnistDataset
+from fathom.util import runstep
 
 
 def standard_scale(X_train, X_test):
@@ -18,9 +19,8 @@ def standard_scale(X_train, X_test):
 class AutoencBase(NeuralNetworkModel):
   """Basic Autoencoder (denoising optional)."""
   def load_data(self):
-    # Grab the dataset from the internet, if necessary
-    self.mnist = input_data.read_data_sets("/tmp/data/", one_hot=True)
-    self.X_train, self.X_test = standard_scale(self.mnist.train.images, self.mnist.test.images)
+    self.mnist = MnistDataset(self.batch_size)
+    self.X_train, self.X_test = self.mnist.train_test_data()
 
   def build_hyperparameters(self):
     # Parameters
@@ -72,14 +72,13 @@ class AutoencBase(NeuralNetworkModel):
         self.epochs = 1
 
       for epoch in xrange(self.epochs):
-        total_batch = self.mnist.train.num_examples // self.batch_size
+        total_batch = self.mnist.num_train_examples() // self.batch_size
 
         avg_cost = 0
         for batch_i in range(total_batch):
           if batch_i >= n_steps:
             return
-          #batch_xs = self.mnist.train.next_batch(self.batch_size)
-          batch_xs = get_random_block_from_data(self.X_train, self.batch_size)
+          batch_xs = self.mnist.next_batch()
 
           if not self.forward_only:
             # train on batch
@@ -185,15 +184,11 @@ def xavier_init(fan_in, fan_out, constant = 1):
                            minval = low, maxval = high,
                            dtype = tf.float32)
 
-def get_random_block_from_data(data, batch_size):
-  start_index = np.random.randint(0, len(data) - batch_size)
-  return data[start_index:(start_index + batch_size)]
-
 class AutoencBaseFwd(AutoencBase):
   forward_only = True
 
 if __name__ == "__main__":
   m = AutoencBase()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run(runstep=runstep)
   m.teardown()

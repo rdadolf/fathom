@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import tensorflow as tf
 
 from fathom.nn import NeuralNetworkModel
@@ -13,7 +14,22 @@ imagenet_record_dir = '/data/ILSVRC2012/imagenet-tfrecord/'
 class Imagenet(Dataset):
   """Design from TensorFlow Inception example."""
   def __init__(self, subset, record_dir=imagenet_record_dir):
-    super(Imagenet, self).__init__(subset, record_dir)
+    """
+    record_dir: Directory with TFRecords.
+    """
+    super(Dataset).__init__(self)
+    self.subset = subset
+    self.record_dir = record_dir
+
+  def data_files(self):
+    return tf.gfile.Glob(os.path.join(self.record_dir, "{}-*".format(self.subset)))
+
+  def record_queue(self):
+    """Return a TensorFlow queue of TFRecords."""
+    return tf.train.string_input_producer(self.data_files())
+
+  def reader(self):
+    return tf.TFRecordReader()
 
   def num_classes(self):
     return 1000

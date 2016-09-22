@@ -43,7 +43,7 @@ def runstep(session, sink_ops, feed_dict, *args, **kwargs):
 ################################################################################
 # Datasets Utilities
 
-from imagenet_preprocessing import distorted_inputs
+#from fathom.data.image_preprocessing import distorted_inputs
 
 class Dataset(object):
   def load(self):
