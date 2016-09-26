@@ -17,7 +17,7 @@ enable=
   # 2 spaces. I don't care what PEP8 says.
   bad-indentation,mixed-indentation,
   # keeps things clean
-  unused-import,unused-variable,
+  #unused-import,unused-variable,
   # I'm needlessly inconsistent about this.
   wrong-import-order,
   # No need for old-style classes, and I sometimes rely on new-style ones. So make everything new.
@@ -27,7 +27,7 @@ enable=
   # I should probably just automatically fix this...
   trailing-whitespace,
   # Prudent.
-  arguments-differ,
+  #arguments-differ,
 
 [REPORTS]
 # Defaults
