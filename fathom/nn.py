@@ -2,13 +2,32 @@
 
 import tensorflow as tf
 from abc import ABCMeta, abstractmethod, abstractproperty
-from nnmodel.frameworks.tf import TFModel
 
-# TODO: make sure this interface works for both CNNs and RNNs
-# roughly based on TensorFlow CIFAR-10 example
-# TODO: better name?
-# TODO: simplify dev set
-class NeuralNetworkModel(TFModel):
+class GenericModel(object):
+  __metaclass__ = ABCMeta
+  def __init__(self, device=None, init_options=None):
+    self.device=device
+
+  @abstractmethod
+  def model(self):
+    'Return a reference to the native representation of the model.'
+    pass
+  def setup(self, setup_options=None):
+    '(Optional) Prepare the model for running.'
+    pass
+  @abstractmethod
+  def run(self, runstep=None, n_steps=1, *args, **kwargs):
+    'Run the model.'
+    pass
+  def teardown(self):
+    '(Optional) Clean up after a model run.'
+    pass
+
+def default_runstep(session, sink_ops, *options, **kw_options):
+  return session.run(sink_ops, *options, **kw_options)
+
+
+class NeuralNetworkModel(GenericModel):
   __metaclass__ = ABCMeta
   forward_only = False
 
@@ -28,7 +47,6 @@ class NeuralNetworkModel(TFModel):
     with self.G.as_default():
       self.init = tf.initialize_all_variables()
 
-  # TODO: no need to always load whole dataset
   @abstractmethod
   def load_data(self):
     """Load dataset (possibly downloading it)."""
@@ -80,7 +98,6 @@ class NeuralNetworkModel(TFModel):
   def build(self):
     """Build computation graph."""
     with self.G.as_default():
-      # TODO: use the global_step
       self.global_step = tf.Variable(0, trainable=False)
 
       self.build_hyperparameters()

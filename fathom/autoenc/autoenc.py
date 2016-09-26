@@ -4,7 +4,7 @@ from math import sqrt
 import numpy as np
 import sklearn.preprocessing as prep
 import tensorflow as tf
-from fathom.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel, default_runstep
 import fathom.imagenet.mnist as input_data
 
 
@@ -203,5 +203,5 @@ class AutoencBaseFwd(AutoencBase):
 if __name__ == "__main__":
   m = AutoencBase()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run(runstep=default_runstep)
   m.teardown()

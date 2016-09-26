@@ -11,7 +11,7 @@ try:
 except ImportError:
   from tensorflow.python.ops.rnn_cell import _linear
 
-from fathom.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel, default_runstep
 
 from preproc import load_timit, timit_hdf5_filepath
 from phoneme import index2phoneme_dict
@@ -138,7 +138,7 @@ class Speech(NeuralNetworkModel):
       istate_bw = tf.placeholder("float", [None, n_hidden])
 
       # TODO: support both tanh (default) and clipped_relu
-      outputs, output_state_fw, output_state_bw = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
+      outputs, _, _ = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
 
       # TODO: is this the right output?
       return outputs[-1]
@@ -258,5 +258,5 @@ class SpeechFwd(Speech):
 if __name__=='__main__':
   m = Speech()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep(), n_steps=10)
+  m.run(runstep=default_runstep, n_steps=10)
   m.teardown()

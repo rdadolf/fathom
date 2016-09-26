@@ -6,8 +6,7 @@ from itertools import chain
 import tensorflow as tf
 import numpy as np
 from sklearn import cross_validation
-from fathom.nn import NeuralNetworkModel
-from nnmodel.frameworks.tf import TFFramework
+from fathom.nn import NeuralNetworkModel, default_runstep
 from data_utils import load_task, vectorize_data
 
 data_dir = "/data/babi/tasks_1-20_v1-2/en/"
@@ -268,6 +267,6 @@ class MemNetFwd(MemNet):
 if __name__=='__main__':
   m = MemNet()
   m.setup()
-  m.run(TFFramework.DefaultRunstep(), n_steps=100)
+  m.run(runstep=default_runstep, n_steps=100)
   m.teardown()
 

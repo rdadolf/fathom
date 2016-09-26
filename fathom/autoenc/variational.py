@@ -3,6 +3,7 @@
 import tensorflow as tf
 
 import numpy as np
+from fathom.nn import default_runstep
 from fathom.autoenc.autoenc import xavier_init, AutoencBase
 
 # heavily based on tensorflow.models.autoencoder
@@ -62,5 +63,5 @@ class AutoencFwd(Autoenc):
 if __name__ == "__main__":
   m = Autoenc()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run(runstep=default_runstep, n_steps=10)
   m.teardown()

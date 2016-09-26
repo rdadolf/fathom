@@ -3,7 +3,7 @@
 # (https://github.com/mrkulk/deepQN_tensorflow).
 import tensorflow as tf
 
-from nnmodel.frameworks.tf import TFFramework, TFModel
+from fathom.nn import GenericModel, default_runstep
 
 from database import *
 from emulator import *
@@ -165,7 +165,7 @@ class DeepQNetNature(object):
       self.rmsprop = tf.train.RMSPropOptimizer(self.params['lr'],self.params['rms_decay'],0.0,self.params['rms_eps']).minimize(self.cost,global_step=self.global_step)
       return self.rmsprop
 
-class DeepQ(TFModel):
+class DeepQ(GenericModel):
   """Deep Q-Learning."""
   forward_only = False
 
@@ -303,7 +303,7 @@ class DeepQ(TFModel):
       actions_onehot[i,int(actions[i])] = 1
     return actions_onehot
 
-  def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1):
+  def run(self, runstep=default_runstep, n_steps=1):
     self.s = time.time()
     print self.params
     print 'Start training!'
@@ -318,7 +318,7 @@ class DeepQ(TFModel):
         else:
           if self.step_eval >= n_steps:
             return
-          self.step_eval += 1
+        self.step_eval += 1
         if self.state_gray_old is not None and not self.forward_only:
           self.DB.insert(self.state_gray_old[26:110,:],self.reward_scaled,self.action_idx,self.terminal)
 
@@ -434,6 +434,6 @@ class DeepQFwd(DeepQ):
 if __name__=='__main__':
   m = DeepQ()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep(),n_steps=100000000)
+  m.run(runstep=default_runstep, n_steps=100)
   m.teardown()
 

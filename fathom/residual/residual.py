@@ -3,9 +3,8 @@
 from math import sqrt
 from collections import namedtuple
 import tensorflow as tf
+from fathom.nn import default_runstep
 from fathom.imagenet import imagenet
-from nnmodel.frameworks.tf import TFFramework
-
 
 # Code heavily based on Parag Mital's TensorFlow tutorials.
 class Residual(imagenet.ImagenetModel):
@@ -186,5 +185,5 @@ class ResidualFwd(Residual):
 if __name__ == "__main__":
   m = Residual()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run(runstep=default_runstep, n_steps=10)
   m.teardown()

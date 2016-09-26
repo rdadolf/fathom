@@ -1,11 +1,12 @@
 # NOTE: Tejas Kulkarni's implementation
+import os.path
 import numpy as np
 import sys
 from ale_python_interface import ALEInterface
 import cv2
 import time
 
-ROM_PATH = 'models/tf/atari/roms/'
+ROM_PATH = 'fathom/deepq/roms/'
 
 class emulator(object):
   def __init__(self, rom_name, vis,frameskip=1,windowname='preview'):
@@ -13,7 +14,10 @@ class emulator(object):
     self.max_frames_per_episode = self.ale.getInt("max_num_frames_per_episode");
     self.ale.setInt("random_seed",123)
     self.ale.setInt("frame_skip",frameskip)
-    self.ale.loadROM(ROM_PATH + rom_name )
+    romfile = str(ROM_PATH)+str(rom_name)
+    if not os.path.exists(romfile):
+      print 'No ROM file found at "'+romfile+'".\nAdjust ROM_PATH or double-check the filt exists.'
+    self.ale.loadROM(romfile)
     self.legal_actions = self.ale.getMinimalActionSet()
     self.action_map = dict()
     self.windowname = windowname

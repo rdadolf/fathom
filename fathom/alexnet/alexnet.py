@@ -2,7 +2,7 @@
 import tensorflow as tf
 
 from fathom.imagenet import imagenet
-from nnmodel.frameworks.tf import TFFramework
+from fathom.nn import default_runstep
 
 def conv2d(name, l_input, w, b):
   return tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(l_input, w, strides=[1, 1, 1, 1], padding='SAME'),b), name=name)
@@ -136,6 +136,6 @@ class AlexNetFwd(AlexNet):
 if __name__=='__main__':
   m = AlexNet()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run(runstep=default_runstep, n_steps=10)
   m.teardown()
 

@@ -7,8 +7,7 @@ import random
 import sys
 import time
 
-from fathom.nn import NeuralNetworkModel
-from nnmodel.frameworks.tf import TFFramework
+from fathom.nn import NeuralNetworkModel, default_runstep
 
 import data_utils
 
@@ -445,6 +444,6 @@ class Seq2SeqFwd(Seq2Seq):
 if __name__=='__main__':
   m = Seq2Seq()
   m.setup()
-  m.run(TFFramework.DefaultRunstep())
+  m.run(runstep=default_runstep, n_steps=10)
   m.teardown()
 

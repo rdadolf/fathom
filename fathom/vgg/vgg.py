@@ -2,8 +2,8 @@
 
 from math import sqrt
 import tensorflow as tf
+from fathom.nn import default_runstep
 from fathom.imagenet import imagenet
-from nnmodel.frameworks.tf import TFFramework
 
 class VGG(imagenet.ImagenetModel):
   """VGG Network."""
@@ -122,5 +122,5 @@ class VGGFwd(VGG):
 if __name__ == "__main__":
   m = VGG()
   m.setup()
-  m.run(runstep=TFFramework.DefaultRunstep())
+  m.run(runstep=default_runstep, n_steps=10)
   m.teardown()

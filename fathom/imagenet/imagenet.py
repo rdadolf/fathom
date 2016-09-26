@@ -2,9 +2,8 @@
 
 import tensorflow as tf
 
-from fathom.nn import NeuralNetworkModel
+from fathom.nn import NeuralNetworkModel, default_runstep
 from fathom.dataset import Dataset
-from nnmodel.frameworks.tf import TFFramework
 from fathom.imagenet.image_processing import distorted_inputs
 
 # TODO: don't hard-code this
@@ -102,7 +101,7 @@ class ImagenetModel(NeuralNetworkModel):
     # Grab the dataset from the internet, if necessary
     self.num_batches_per_epoch = self.dataset.num_examples_per_epoch() / self.batch_size
 
-  def run(self, runstep=TFFramework.DefaultRunstep(), n_steps=1):
+  def run(self, runstep=default_runstep, n_steps=1):
     self.load_data()
 
     with self.G.as_default():
