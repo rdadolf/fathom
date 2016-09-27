@@ -7,7 +7,10 @@ layout: titlecard
 
 <hr>
 
-## We're on the way!
+## We're live!
 
-The official Fathom workloads will be released alongside the paper's presentation at [IISWC 2016](http://www.iiswc.org/iiswc2016/index.html).<br>
-Check back on September 27th.
+Our [source repository](https://github.com/rdadolf/fathom) is now public, and the initial release is available here: [`0.9-soft`](https://github.com/rdadolf/fathom/releases).
+
+If you're planning on using Fathom, we recommend you read our [paper](http://arxiv.org/abs/1608.06581) first.
+
+[Contact Us](mailto:rdadolf@gmail.com)
