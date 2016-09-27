@@ -55,8 +55,9 @@ $ ./fathom/seq2seq/seq2seq.py
 
 Or as a library:
 ```
+export PYTHONPATH=`pwd`/fathom
 $ python
->>> from fathom import seq2seq.TF_SEQ2SEQ as Seq2seq
+>>> from fathom import Seq2seq
 >>> model = Seq2seq()
 >>> model.setup()
 >>> model.run()
