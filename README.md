@@ -11,8 +11,8 @@ This release reflects the state of Fathom more or less as it was for the paper p
 This paper contains a full description of the workloads, performance characteristics, and the rationale behind the project:
 
 > R. Adolf, S. Rama, B. Reagen, G.Y. Wei, D. Brooks. "Fathom: Reference Workloads for Modern Deep Learning Methods."
-[(Arxiv)](http://arxiv.org/pdf/FIXME.pdf)
-[(DOI)](http://dx.doi.org/10.1109/IISWC.2016.FIXME)
+[(Arxiv)](http://arxiv.org/abs/1608.06581)
+<span style='color=gray'>(DOI)</span>
 
 Name     | Description
 -------- | -----
