@@ -2,7 +2,7 @@
 
 [![build status](https://travis-ci.org/rdadolf/fathom.svg?branch=master)](https://travis-ci.org/rdadolf/fathom)
 
-## Release: `0.9-soft`
+## Release: [`0.9-soft`](https://github.com/rdadolf/fathom/releases)
 
 This release reflects the state of Fathom more or less as it was for the paper published paper in September 2016. We are currently developing a somewhat more user-friendly version, which you can track in the GitHub issue tracker. If you're eager to use Fathom as it is, please let us know. We might be able to help you get started.
 
@@ -19,7 +19,7 @@ Name     | Description
 Seq2Seq  | Direct language-to-language sentence translation. State-of-the-art accuracy with a simple, language-agnostic architecture.
 MemNet   | Facebook's memory-oriented neural system. One of two novel architectures which explore a topology beyond feed-forward lattices of neurons.
 Speech   | Baidu's speech recognition engine. Proved purely deep-learned networks can beat hand-tuned systems.
-AutoEnc  | Variational autoencoder. An efficient, generative model for feature learning.
+Autoenc  | Variational autoencoder. An efficient, generative model for feature learning.
 Residual | Image classifier from Microsoft Research Asia. Dramatically increased the practical depth of convolutional networks. ILSVRC 2015 winner.
 VGG      | Image classifier demonstrating the power of small convolutional filters. ILSVRC 2014 winner.
 AlexNet  | Image classifier. Watershed for deep learning by beating hand-tuned image systems at ILSVRC 2012.
