@@ -1,0 +1,43 @@
+/* Fathom uses a light Open Sans for body and Gruppo for styled titles. */
+@import 'https://fonts.googleapis.com/css?family=Gruppo|Open+Sans';
+body, h1, h2, h3, h4, h5, h6, legend {
+  font-family: 'Open Sans', 'Helvetica Neue', 'Helvetica';
+  font-weight: 300;
+}
+/* Style all links in Fathom blue. */
+a, a:visited {
+  color: #007da5;
+}
+
+/***** Navigation Header *****/
+/* Remove the house icon near the title. */
+a.icon-home:before { content: ''; }
+/* Give the title a stylized look. */
+a.icon-home { /* Desktop */
+  color: #fcfcfc;
+  font-family: 'Gruppo';
+  font-size: 30pt;
+  font-weight: 400;
+  margin-bottom: 5px;
+}
+.wy-nav-top a { /* Mobile */
+  color: #fcfcfc;
+  font-family: 'Gruppo';
+  font-size: 24pt;
+  font-weight: 400;
+  margin-bottom: 5px;
+}
+
+/* Add water as a background on desktop, just Fathom blue on mobile. */
+.wy-side-nav-search { /* Desktop */
+  background: url(water-header.png) #007da5;
+  padding: 5px;
+}
+.wy-nav-top {
+  background-color: #007da5;
+}
+
+/***** Navigation Body *****/
+.wy-menu-vertical a {
+  color: #b3b3b3; /* Back to the default */
+}

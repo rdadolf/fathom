@@ -1,0 +1,13 @@
+site_name: Fathom
+repo_url: https://github.com/rdadolf/fathom
+site_description: 'Fathom: Reference Workloads for Modern Deep Learning Methods'
+google_analytics: ['UA-29492860-5', 'auto']
+
+theme: 'readthedocs'
+site_dir: 'deploy'
+extra_css: [assets/fathom.css]
+
+pages:
+  - 'Overview': index.md
+  - 'Getting Started': quickstart.md
+  - 'Frequently Asked Questions': faq.md
