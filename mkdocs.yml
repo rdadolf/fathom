@@ -6,6 +6,7 @@ google_analytics: ['UA-29492860-5', 'auto']
 theme: 'readthedocs'
 site_dir: 'deploy'
 extra_css: [assets/fathom.css]
+extra_js: [assets/fix_search.js]
 
 pages:
   - 'Overview': index.md
