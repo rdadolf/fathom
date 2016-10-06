@@ -9,7 +9,7 @@ This release reflects the state of Fathom more or less as it was for the paper p
 
 ## Workloads
 
-This paper contains a full description of the workloads, performance characteristics, and the rationale behind the project:
+This paper contains a description of the workloads, performance characteristics, and the rationale behind the project:
 
 > R. Adolf, S. Rama, B. Reagen, G.Y. Wei, D. Brooks. "Fathom: Reference Workloads for Modern Deep Learning Methods."
 [(Arxiv)](http://arxiv.org/abs/1608.06581)
@@ -26,22 +26,10 @@ VGG      | Image classifier demonstrating the power of small convolutional filte
 AlexNet  | Image classifier. Watershed for deep learning by beating hand-tuned image systems at ILSVRC 2012.
 DeepQ    | Atari-playing neural network from DeepMind. Achieves superhuman performance on majority of Atari2600 games, without any preconceptions.
 
-## Data
-
-Fathom does not come with datasets suitable for training. This is a combination of size (realistic training sets are often massive) and licensing (an oft-repeated mantra is that good data is more valuable than a good model).
-Regardless, the inputs Fathom is designed for are standard and widely-available.
-
-These links should take you to the original data owners:
-
-- [ImageNet](http://www.image-net.org/download-images) - requires registration, but downloads are free for non-commercial purposes.
-- [WMT15](http://www.statmt.org/europarl/)
-- [bAbI](https://research.facebook.com/research/babi/)
-- MNIST - automatically downloaded by Fathom.
-- TIMIT - requires membership of the Linguistic Data Consortium (this is not free, but it is widely available in the research community).
-- Atari "Breakout" ROM - available online
-
 ## Getting Started
 
-We've begun to put together some actual documentation, and it's already better than what we had: [Fathom Quickstart Guide](http://fathom.readthedocs.io/en/latest/quickstart/).
+We've begun to put together some actual documentation, and it's already better than what we had:
+
+ - [Fathom Quickstart Guide](http://fathom.readthedocs.io/en/latest/quickstart/).
 
 Please bear with us as the docs get fleshed out.
