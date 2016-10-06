@@ -40,26 +40,8 @@ These links should take you to the original data owners:
 - TIMIT - requires membership of the Linguistic Data Consortium (this is not free, but it is widely available in the research community).
 - Atari "Breakout" ROM - available online
 
-## Running
+## Getting Started
 
-#### Prerequisites:
-Fathom is tested with TensorFlow v0.8rc0, and due to API instability, there are issues with recent versions (Google has changed TF's layout several times). If you're willing to rename your functions and swap a couple import statements, recent versions of TF should work.
+We've begun to put together some actual documentation, and it's already better than what we had: [Fathom Quickstart Guide](http://fathom.readthedocs.io/en/latest/quickstart/).
 
-Many of the models require external python libraries (e.g., [ALE](https://github.com/mgbellemare/Arcade-Learning-Environment) for DeepQ). Most of these are available as `pip` packages.
-
-#### Running a single model:
-
-Models can be run directly:
-```
-$ ./fathom/seq2seq/seq2seq.py
-```
-
-Or as a library:
-```
-export PYTHONPATH=`pwd`/fathom
-$ python
->>> from fathom import Seq2seq
->>> model = Seq2seq()
->>> model.setup()
->>> model.run()
-```
+Please bear with us as the docs get fleshed out.

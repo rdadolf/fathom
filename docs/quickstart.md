@@ -57,9 +57,36 @@ The image will automatically be downloaded from the Docker hub, launched, and yo
 
 # Downloading Data
 
-*In progress*
+*<div style='color: red'>Documentation in progress</div>*
+
+Fathom does not come with datasets suitable for training. This is a combination of size (realistic training sets are often massive) and licensing (an oft-repeated mantra is that good data is more valuable than a good model).
+Regardless, the inputs Fathom is designed for are standard and widely-available.
+
+These links should take you to the original data owners:
+
+- [ImageNet](http://www.image-net.org/download-images) - requires registration, but downloads are free for non-commercial purposes.
+- [WMT15](http://www.statmt.org/europarl/) - automatically downloaded by Fathom
+- [bAbI](https://research.facebook.com/research/babi/)
+- [MNIST](http://yann.lecun.com/exdb/mnist/) - automatically downloaded by Fathom.
+- [TIMIT](https://catalog.ldc.upenn.edu/ldc93s1) - requires membership of the Linguistic Data Consortium (this is not free, but it is widely available in the research community).
+- Atari "Breakout" ROM - [You'll have to find this on your own.](https://www.google.com/search?q=atari+breakout+rom)
 
 # Running the Workloads
 
-*In progress*
+*<div style='color: red'>Documentation in progress</div>*
+
+Models can be run directly:
+```sh
+$ ./fathom/seq2seq/seq2seq.py
+```
+
+Or as a library:
+```python
+export PYTHONPATH=`pwd`/fathom
+$ python
+>>> from fathom import Seq2seq
+>>> model = Seq2seq()
+>>> model.setup()
+>>> model.run()
+```
 
