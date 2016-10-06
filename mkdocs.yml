@@ -10,4 +10,5 @@ extra_css: [assets/fathom.css]
 pages:
   - 'Overview': index.md
   - 'Getting Started': quickstart.md
+  - 'Models': models.md
   - 'Frequently Asked Questions': faq.md

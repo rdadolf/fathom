@@ -4,9 +4,19 @@ body, h1, h2, h3, h4, h5, h6, legend {
   font-family: 'Open Sans', 'Helvetica Neue', 'Helvetica';
   font-weight: 300;
 }
+code {
+  font-size: 95%;
+  padding-top: 4px;
+}
 /* Style all links in Fathom blue. */
 a, a:visited {
   color: #007da5;
+}
+/* Make the large headers more visible */
+h1 {
+  padding-bottom: 5px;
+  /*border-left: solid #007da5 1px;*/
+  border-bottom: solid #007da5 1px;
 }
 
 /***** Navigation Header *****/
@@ -40,4 +50,7 @@ a.icon-home { /* Desktop */
 /***** Navigation Body *****/
 .wy-menu-vertical a {
   color: #b3b3b3; /* Back to the default */
+}
+.wy-menu-vertical li.toctree-l3 a {
+  color: #404040; /* Highlight the difference between h1's and h*'s */
 }
