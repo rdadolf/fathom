@@ -52,7 +52,7 @@ def maybe_download(directory, filename, url):
   """Download filename from url unless it's already in directory."""
   if not os.path.exists(directory):
     print("Creating directory %s" % directory)
-    os.mkdir(directory)
+    os.makedirs(directory)
   filepath = os.path.join(directory, filename)
   if not os.path.exists(filepath):
     print("Downloading %s to %s" % (url, filepath))

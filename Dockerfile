@@ -20,7 +20,10 @@ RUN cd /tmp/ALE && pip install .
 RUN apt-get install -y libopencv-dev python-opencv
 
 ### Create a Fathom working environment
+RUN mkdir /data
 RUN useradd -ms /bin/bash fathom
+RUN chown fathom /data
+RUN chmod a+rwx /data
 USER fathom
 WORKDIR /home/fathom
 RUN git clone https://github.com/rdadolf/fathom.git
