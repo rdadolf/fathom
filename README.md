@@ -1,6 +1,6 @@
 ![Fathom: Reference Workloads for Modern Deep Learning](https://raw.githubusercontent.com/rdadolf/fathom/master/fathom.png)
 
-[![build status](https://travis-ci.org/rdadolf/fathom.svg?branch=master)](https://travis-ci.org/rdadolf/fathom)
+[![build status](https://img.shields.io/badge/build-disabled-lightgray.svg)](https://travis-ci.org/rdadolf/fathom)
 [![docs status](https://readthedocs.org/projects/fathom/badge/?version=latest)](http://fathom.readthedocs.io/en/latest/)
 
 ## Release: [`0.9-soft`](https://github.com/rdadolf/fathom/releases)
