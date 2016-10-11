@@ -60,33 +60,39 @@ The image will automatically be downloaded from the Docker hub, launched, and yo
 *<div style='color: red'>Documentation in progress</div>*
 
 Fathom does not come with datasets suitable for training. This is a combination of size (realistic training sets are often massive) and licensing (an oft-repeated mantra is that good data is more valuable than a good model).
-Regardless, the inputs Fathom is designed for are standard and widely-available.
 
-These links should take you to the original data owners:
+Regardless, the inputs Fathom is designed for are standard and widely-available:
 
 - [ImageNet](http://www.image-net.org/download-images) - requires registration, but downloads are free for non-commercial purposes.
-- [WMT15](http://www.statmt.org/wmt15/translation-task.html) - automatically downloaded by Fathom
-- [bAbI](https://research.facebook.com/research/babi/)
-- [MNIST](http://yann.lecun.com/exdb/mnist/) - automatically downloaded by Fathom.
+- [WMT15](http://www.statmt.org/wmt15/translation-task.html) - freely available online, and automatically downloaded by Fathom
+- [bAbI](https://research.facebook.com/research/babi/) - freely available online
+- [MNIST](http://yann.lecun.com/exdb/mnist/) - freely available online, and automatically downloaded by Fathom.
 - [TIMIT](https://catalog.ldc.upenn.edu/ldc93s1) - requires membership of the Linguistic Data Consortium (this is not free, but it is widely available in the research community).
-- Atari "Breakout" ROM - [You'll have to find this on your own.](https://www.google.com/search?q=atari+breakout+rom)
+- Atari "Breakout" ROM - Technically not freely available. In practice, it is [available online](https://www.google.com/search?q=atari+breakout+rom). You can also legally obtain this by dumping the memory of an Atari 2600 running a copy of Breakout you bought.
 
 # Running the Workloads
 
-*<div style='color: red'>Documentation in progress</div>*
+Fathom is a Python library with command-line shims. To use Fathom, you'll need to tell your Python installation where to find it. The easiest way is to adjust your `PYTHONPATH` environment variable:
 
-Models can be run directly:
 ```sh
+$ git clone https://github.com/rdadolf/fathom.git
+$ export PYTHONPATH=`pwd`/fathom
+```
+
+Once you've done that, you can either run the models directly (using the command-line shims):
+
+```sh
+$ cd fathom 
 $ ./fathom/seq2seq/seq2seq.py
 ```
 
-Or as a library:
+or you can use Fathom as a Python library directly in your scripts:
+
 ```python
-export PYTHONPATH=`pwd`/fathom
-$ python
->>> from fathom import Seq2seq
->>> model = Seq2seq()
->>> model.setup()
->>> model.run()
+from fathom import Seq2seq
+model = Seq2seq()
+model.setup()
+model.run()
 ```
 
+Note: [DeepQ](/models/#deepq) currently looks for its ROMs relative to Fathom's root directory. In practice, this will cause problems if you don't run in that directory. We are working on a more general configuration interface, but in the meantime, you should feel free to modify the `ROM_PATH` variable in `fathom/deepq/emuator.py`.
