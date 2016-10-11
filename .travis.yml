@@ -1,9 +1,0 @@
-#language: python
-#script:
-#  - pylint -rn fathom/
-#  - pylint -rn test/
-#  - nosetests -v test/
-#notifications:
-#  email:
-#    on_success: never
-#    on_failure: always
