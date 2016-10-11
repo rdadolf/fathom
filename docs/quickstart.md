@@ -65,7 +65,7 @@ Regardless, the inputs Fathom is designed for are standard and widely-available.
 These links should take you to the original data owners:
 
 - [ImageNet](http://www.image-net.org/download-images) - requires registration, but downloads are free for non-commercial purposes.
-- [WMT15](http://www.statmt.org/europarl/) - automatically downloaded by Fathom
+- [WMT15](http://www.statmt.org/wmt15/translation-task.html) - automatically downloaded by Fathom
 - [bAbI](https://research.facebook.com/research/babi/)
 - [MNIST](http://yann.lecun.com/exdb/mnist/) - automatically downloaded by Fathom.
 - [TIMIT](https://catalog.ldc.upenn.edu/ldc93s1) - requires membership of the Linguistic Data Consortium (this is not free, but it is widely available in the research community).
