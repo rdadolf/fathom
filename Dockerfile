@@ -9,7 +9,7 @@ RUN pip install scikit-learn
 RUN pip install librosa
 RUN apt-get install -y libhdf5-dev
 RUN pip install h5py
-RUN pip install tqdm
+
 # ALE
 RUN apt-get install -y libsdl1.2-dev libsdl-gfx1.2-dev libsdl-image1.2-dev cmake
 RUN git clone https://github.com/mgbellemare/Arcade-Learning-Environment.git /tmp/ALE

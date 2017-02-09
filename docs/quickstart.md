@@ -29,7 +29,7 @@ You'll want to install the following list of packages. (You may have several of 
  - scikit-learn ([MemNet](/models/#memnet), [Speech](/models/#speech), [Autoenc](/models/#autoenc))
  - six ([Seq2Seq](/models/#seq2seq))
  - librosa ([Speech](/models/#speech))
- - tqdm ([Speech](/models/#speech))
+ <!-- - tqdm ([Speech](/models/#speech)) -->
  - h5py* ([Speech](/models/#speech))
 
 *For h5py, you'll also need libhdf5, which is the C++ backend for interfacing with HDF5-formatted files. This is usually available as a Linux package, but [building from source](https://support.hdfgroup.org/downloads/index.html) is also fine. Any recent version should work. In Ubuntu, the package you're looking for is `libhdf5-dev`.
