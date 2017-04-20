@@ -20,8 +20,8 @@ class MemNet(NeuralNetworkModel):
       # variables
       #with tf.variable_scope(self.name):
       nil_word_slot = tf.zeros([1, self.embedding_size])
-      A = tf.concat(0, [ nil_word_slot, self.initializer([self.vocab_size-1, self.embedding_size]) ])
-      B = tf.concat(0, [ nil_word_slot, self.initializer([self.vocab_size-1, self.embedding_size]) ])
+      A = tf.concat(axis=0, values=[ nil_word_slot, self.initializer([self.vocab_size-1, self.embedding_size]) ])
+      B = tf.concat(axis=0, values=[ nil_word_slot, self.initializer([self.vocab_size-1, self.embedding_size]) ])
       self.A = tf.Variable(A, name="A")
       self.B = tf.Variable(B, name="B")
 
@@ -73,7 +73,7 @@ class MemNet(NeuralNetworkModel):
       with tf.name_scope('loss'):
         # Define loss
         # TODO: does this labels have unexpected state?
-        self.loss_op = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits, tf.cast(labels, tf.float32)))
+        self.loss_op = tf.reduce_sum(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=tf.cast(labels, tf.float32)))
     return self.loss_op
 
   @property
@@ -243,11 +243,11 @@ def zero_nil_slot(t, name=None):
   The nil_slot is a dummy slot and should not be trained and influence
   the training algorithm.
   """
-  with tf.op_scope([t], name, "zero_nil_slot") as name:
+  with tf.name_scope(values=[t], name=name, default_name="zero_nil_slot") as name:
     t = tf.convert_to_tensor(t, name="t")
     s = tf.shape(t)[1]
-    z = tf.zeros(tf.pack([1, s]))
-    return tf.concat(0, [z, tf.slice(t, [1, 0], [-1, -1])], name=name)
+    z = tf.zeros(tf.stack([1, s]))
+    return tf.concat(axis=0, values=[z, tf.slice(t, [1, 0], [-1, -1])], name=name)
 
 def add_gradient_noise(t, stddev=1e-3, name=None):
   """
@@ -256,7 +256,7 @@ def add_gradient_noise(t, stddev=1e-3, name=None):
   The output will be `t` + gaussian noise.
   0.001 was said to be a good fixed value for memory networks [2].
   """
-  with tf.op_scope([t, stddev], name, "add_gradient_noise") as name:
+  with tf.name_scope(values=[t, stddev], name=name, default_name="add_gradient_noise") as name:
     t = tf.convert_to_tensor(t, name="t")
     gn = tf.random_normal(tf.shape(t), stddev=stddev)
     return tf.add(t, gn, name=name)
