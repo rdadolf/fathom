@@ -6,10 +6,7 @@ import tensorflow as tf
 #from tensorflow.models.rnn import rnn, rnn_cell
 from tensorflow.python.ops import functional_ops
 from tensorflow.python.ops import variable_scope as vs
-try:
-  from tensorflow.python.ops.rnn_cell import linear as _linear
-except ImportError:
-  from tensorflow.python.ops.rnn_cell import _linear
+from tensorflow.contrib.rnn.python.ops.rnn_cell import _linear
 
 from fathom.nn import NeuralNetworkModel, default_runstep
 
@@ -22,7 +19,7 @@ def clipped_relu(inputs, clip=20):
   return tf.minimum(tf.nn.relu(inputs), clip)
 
 
-class ClippedReluRNNCell(tf.nn.rnn_cell.RNNCell):
+class ClippedReluRNNCell(tf.contrib.rnn.RNNCell):
   """Basic RNN cell with clipped ReLU rather than tanh activation."""
 
   def __init__(self, num_units, input_size=None):
@@ -85,7 +82,7 @@ class Speech(NeuralNetworkModel):
       self.sparse_labels = self.ctc_label_dense_to_sparse(self.labels, self.seq_lens)
 
       # CTC
-      self.loss_op = tf.contrib.ctc.ctc_loss(
+      self.loss_op = tf.nn.ctc_loss(
         inputs=self.logits_t,
         labels=self.sparse_labels,
         sequence_length=self.seq_lens
@@ -117,7 +114,7 @@ class Speech(NeuralNetworkModel):
       b_batch = tf.tile(tf.expand_dims(tf.expand_dims(b, 0), 0), b_batch_multiples)
 
       # TODO: change batch_matmul to an averaging reshape so that batching happens and dimensions are easier
-      outputs = tf.add(tf.batch_matmul(inputs, W_batch), b_batch)
+      outputs = tf.add(tf.matmul(inputs, W_batch), b_batch)
 
       return clipped_relu(outputs)
 
@@ -131,14 +128,14 @@ class Speech(NeuralNetworkModel):
       inputs = tf.transpose(inputs, perm=[1, 0, 2])  # permute max_time and batch_size
       inputs = tf.reshape(inputs, [-1, n_input]) # (max_time*batch_size, n_input)
 
-      inputs = tf.split(0, self.max_frames, inputs) # max_time * (batch_size, n_hidden)
+      inputs = tf.split(axis=0, num_or_size_splits=self.max_frames, value=inputs) # max_time * (batch_size, n_hidden)
 
       # optional initial states
       istate_fw = tf.placeholder("float", [None, n_hidden])
       istate_bw = tf.placeholder("float", [None, n_hidden])
 
       # TODO: support both tanh (default) and clipped_relu
-      outputs, _, _ = tf.nn.bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
+      outputs, _, _ = tf.contrib.rnn.static_bidirectional_rnn(fw_cell, bw_cell, inputs, initial_state_fw=istate_fw, initial_state_bw=istate_bw)
 
       # TODO: is this the right output?
       return outputs[-1]
@@ -147,23 +144,24 @@ class Speech(NeuralNetworkModel):
     """Mike Henry's implementation, with some minor modifications."""
     with self.G.as_default():
       label_shape = tf.shape( labels )
-      num_batches_tns = tf.pack( [label_shape[0]] )
-      max_num_labels_tns = tf.pack( [label_shape[1]] )
+      num_batches_tns = tf.stack( [label_shape[0]] )
+      max_num_labels_tns = tf.stack( [label_shape[1]] )
 
       def range_less_than(previous_state, current_input):
         return tf.expand_dims( tf.range( label_shape[1] ), 0 ) < current_input
 
       init = tf.cast( tf.fill( max_num_labels_tns, 0 ), tf.bool )
+      init = tf.expand_dims( init, 0 )
       dense_mask = functional_ops.scan(range_less_than, label_lengths , initializer=init, parallel_iterations=1)
       dense_mask = dense_mask[ :, 0, : ]
 
       label_array = tf.reshape( tf.tile( tf.range( 0, label_shape[1] ), num_batches_tns ), label_shape )
       label_ind = tf.boolean_mask( label_array, dense_mask )
 
-      batch_array = tf.transpose( tf.reshape( tf.tile( tf.range( 0,  label_shape[0] ), max_num_labels_tns ), tf.reverse( label_shape,[True]) ) )
+      batch_array = tf.transpose( tf.reshape( tf.tile( tf.range( 0,  label_shape[0] ), max_num_labels_tns ), tf.reverse( label_shape,[0]) ) )
       batch_ind = tf.boolean_mask( batch_array, dense_mask )
 
-      indices = tf.transpose( tf.reshape( tf.concat( 0, [batch_ind, label_ind] ), [2,-1] ) )
+      indices = tf.transpose( tf.reshape( tf.concat( axis=0, values=[batch_ind, label_ind] ), [2,-1] ) )
       vals_sparse = tf.gather_nd( labels, indices )
       return tf.SparseTensor( tf.to_int64(indices), vals_sparse, tf.to_int64( label_shape ) )
 
@@ -214,9 +212,9 @@ class Speech(NeuralNetworkModel):
   def decoding(self):
     """Predict labels from learned sequence model."""
     # TODO: label error rate on validation set
-    decoded, _ = tf.contrib.ctc.ctc_greedy_decoder(self.logits_t, self.seq_lens)
+    decoded, _ = tf.nn.ctc_greedy_decoder(self.logits_t, self.seq_lens)
     sparse_decode_op = decoded[0] # single-element list
-    self.decode_op = tf.sparse_to_dense(sparse_decode_op.indices, sparse_decode_op.shape, sparse_decode_op.values)
+    self.decode_op = tf.sparse_to_dense(sparse_decode_op.indices, sparse_decode_op.dense_shape, sparse_decode_op.values)
     return self.decode_op
 
   def run(self, runstep=None, n_steps=1, *args, **kwargs):
