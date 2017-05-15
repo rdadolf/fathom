@@ -131,22 +131,22 @@ class DeepQNetNature(object):
 
       #Q,Cost,Optimizer
       self.discount = tf.constant(self.params['discount'])
-      self.yj = tf.add(self.rewards, tf.mul(1.0-self.terminals, tf.mul(self.discount, self.q_t)))
-      self.Qxa = tf.mul(self.y,self.actions)
-      self.Q_pred = tf.reduce_max(self.Qxa, reduction_indices=1)
+      self.yj = tf.add(self.rewards, tf.multiply(1.0-self.terminals, tf.multiply(self.discount, self.q_t)))
+      self.Qxa = tf.multiply(self.y,self.actions)
+      self.Q_pred = tf.reduce_max(self.Qxa, axis=1)
       #self.yjr = tf.reshape(self.yj,(-1,1))
       #self.yjtile = tf.concat(1,[self.yjr,self.yjr,self.yjr,self.yjr])
       #self.yjax = tf.mul(self.yjtile,self.actions)
 
       #half = tf.constant(0.5)
-      self.diff = tf.sub(self.yj, self.Q_pred)
+      self.diff = tf.subtract(self.yj, self.Q_pred)
       if self.params['clip_delta'] > 0 :
         self.quadratic_part = tf.minimum(tf.abs(self.diff), tf.constant(self.params['clip_delta']))
-        self.linear_part = tf.sub(tf.abs(self.diff),self.quadratic_part)
+        self.linear_part = tf.subtract(tf.abs(self.diff),self.quadratic_part)
         self.diff_square = 0.5 * tf.pow(self.quadratic_part,2) + self.params['clip_delta']*self.linear_part
 
       else:
-        self.diff_square = tf.mul(tf.constant(0.5),tf.pow(self.diff, 2))
+        self.diff_square = tf.multiply(tf.constant(0.5),tf.pow(self.diff, 2))
       # add optimization
 
       self.loss()
@@ -237,7 +237,7 @@ class DeepQ(GenericModel):
         self.setup_config.gpu_options.per_process_gpu_memory_fraction=self.params['gpu_fraction']
 
       self.sess = tf.Session(config=self.setup_config)
-      self.init = tf.initialize_all_variables()
+      self.init = tf.global_variables_initializer()
       self.sess.run(self.init)
       self.sess.run(self.cp_ops)
 

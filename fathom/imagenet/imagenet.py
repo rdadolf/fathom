@@ -84,7 +84,7 @@ class ImagenetModel(NeuralNetworkModel):
     with self.G.as_default():
       # Define loss
       # TODO: does this labels have unexpected state?
-      self.loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits, labels))
+      self.loss_op = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels))
     return self.loss_op
 
   def build_train(self, total_loss):

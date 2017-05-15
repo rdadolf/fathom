@@ -45,7 +45,7 @@ class NeuralNetworkModel(GenericModel):
         self.build()
 
     with self.G.as_default():
-      self.init = tf.initialize_all_variables()
+      self.init = tf.global_variables_initializer()
 
   @abstractmethod
   def load_data(self):

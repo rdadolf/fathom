@@ -144,7 +144,7 @@ class AutoencBase(NeuralNetworkModel):
 
   def build_loss(self, inputs, reconstruction):
     with self.G.as_default():
-      self.loss_op = 0.5 * tf.reduce_sum(tf.pow(tf.sub(reconstruction, inputs), 2.0))
+      self.loss_op = 0.5 * tf.reduce_sum(tf.pow(tf.subtract(reconstruction, inputs), 2.0))
     return self.loss_op
 
   @property
