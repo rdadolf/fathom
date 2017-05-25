@@ -5,21 +5,20 @@ Fathom requires a fair number of other software packages to use. TensorFlow is t
 ## TensorFlow
 
  - Python 2.6+
- - [TensorFlow 0.8.0rc0](https://github.com/tensorflow/tensorflow/releases/tag/v0.8.0rc0)
+ - TensorFlow 1.x+ (artifact for paper required [TensorFlow 0.8.0rc0](https://github.com/tensorflow/tensorflow/releases/tag/v0.8.0rc0))
 
-For TensorFlow, you can either download a pre-built binary or build from source. The latter is more involved, but can allow more flexibility in configuration (i.e.- you can pass specific options to the underlying math libraries which can affect performance). To build from source, you'll also need Bazel, Google's build system. Instructions can be found in the TensorFlow documentation (archived here):
+For TensorFlow, you can either download a pre-built binary or build from source. The latter is more involved, but can allow more flexibility in configuration (i.e.- you can pass specific options to the underlying math libraries which can affect performance). 
 
-  - [TensorFlow installation using Pip](https://github.com/tensorflow/tensorflow/blob/v0.8.0rc0/tensorflow/g3doc/get_started/os_setup.md#pip-installation)
-  - [TensorFlow installation from source](https://github.com/tensorflow/tensorflow/blob/v0.8.0rc0/tensorflow/g3doc/get_started/os_setup.md#installing-from-sources)
+To build from source, you'll also need Bazel, Google's build system. Instructions can be found in the TensorFlow documentation.
 
-Due to API flux on Google's side, Fathom will not quite work with TensorFlow 0.9 or later. This is somewhat annoying, but if your application requires it, the changes required to make Fathom compatible are not extensive.
+The TensorFlow API is rapidly changing, and so it is possible for Fathom to break in small ways on unintended versions of TensorFlow. These issues tend to be about package imports and renaming rather than fundamentally devastating differences, so feel free to submit pull requests if you fix them on your own.
 
 ## Supporting libraries
 
 Fathom needs several other python as well, mostly for pre-processing inputs. For all of these, you have your choice of methods for installing them:
 
  - `apt-get`: (or your favorite Linux distribution's package manager) This is a quick route, but be careful of versioning. Sometimes distributions lag a fair ways behind in version numbers.
- - `pip`: 
+ - `pip`: preferred package installer for Python
  - `conda`: If you're using an Anaconda distribution of python, this is probably your best bet for numpy, scipy, and scikit-learn. You'll need to use `pip` for librosa and tqdm, though (as Continuum doesn't support these packages).
 
 You'll want to install the following list of packages. (You may have several of them installed already, and you shouldn't need to re-install&mdash;Fathom doesn't use any fancy features).
@@ -70,6 +69,8 @@ Regardless, the inputs Fathom is designed for are standard and widely-available:
 - [TIMIT](https://catalog.ldc.upenn.edu/ldc93s1) - requires membership of the Linguistic Data Consortium (this is not free, but it is widely available in the research community).
 - Atari "Breakout" ROM - Technically not freely available. In practice, it is [available online](https://www.google.com/search?q=atari+breakout+rom). You can also legally obtain this by dumping the memory of an Atari 2600 running a copy of Breakout you bought.
 
+We eventually want to write synthetic datasets which allow users to run Fathom out of the box without requiring the above downloads.
+
 # Running the Workloads
 
 Fathom is a Python library with command-line shims. To use Fathom, you'll need to tell your Python installation where to find it. The easiest way is to adjust your `PYTHONPATH` environment variable:
@@ -95,4 +96,13 @@ model.setup()
 model.run()
 ```
 
-Note: [DeepQ](/models/#deepq) currently looks for its ROMs relative to Fathom's root directory. In practice, this will cause problems if you don't run in that directory. We are working on a more general configuration interface, but in the meantime, you should feel free to modify the `ROM_PATH` variable in `fathom/deepq/emuator.py`.
+## ImageNet
+
+The ImageNet workflow is finicky for training and the parameters and optimizations we have included do not reflect the state-of-the-art (e.g., batch normalization). Several users have reported issues with running the training flow out of the box, and we are currently working on resolving these issues.
+
+If you do not want to download and set up ImageNet, then you can switch to using MNIST as provided in `fathom/imagenet/mnist.py`. Some of the models (e.g., VGG) may require modification because their convolutional kernels compress the smaller MNIST images too much.
+
+## DeepQ
+
+Note: [DeepQ](/models/#deepq) currently looks for its ROMs relative to Fathom's root directory. In practice, this will cause problems if you don't run in that directory. We are working on a more general configuration interface, but in the meantime, you should feel free to modify the `ROM_PATH` variable in `fathom/deepq/emulator.py`.
+

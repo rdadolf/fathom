@@ -48,3 +48,7 @@ ROM_PATH='/tmp/fathom/fathom/deepq/roms/'
 $ export PYTHONPATH=/tmp/fathom
 $ python /tmp/fathom/fathom/deepq/deepq.py
 ```
+
+# I found an issue with the Speech model!
+
+Our implementation requires significant improvement, which we have not yet undertaken for lack of time.

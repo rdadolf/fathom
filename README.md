@@ -5,7 +5,7 @@
 
 ## Release: [`0.9-soft`](https://github.com/rdadolf/fathom/releases)
 
-This release reflects the state of Fathom more or less as it was for the paper published paper in September 2016. We are currently developing a somewhat more user-friendly version, which you can track in the GitHub issue tracker. If you're eager to use Fathom as it is, please let us know. We might be able to help you get started.
+This release reflects the state of Fathom more or less as it was for the paper published in September 2016. We are currently developing a somewhat more user-friendly version, which you can track in the GitHub issue tracker. If you're eager to use Fathom as it is, please let us know.
 
 ## Workloads
 
