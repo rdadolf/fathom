@@ -8,7 +8,6 @@ import librosa
 import sklearn.preprocessing
 import h5py
 import logging
-from tqdm import tqdm # progress bar
 
 import os
 import fnmatch
@@ -116,7 +115,7 @@ def compute_spectrograms(audio_filenames):
   features_list = []
   audio_ext = ".WAV"
 
-  for audio_basename in tqdm(audio_filenames):
+  for audio_basename in audio_filenames:
     # recompute spectrogram features
     # FIXME: on interrupt, kill the thread which librosa launches via audioread
     feature_vector = mfcc_features(audio_basename + audio_ext)
