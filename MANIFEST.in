@@ -1,0 +1,8 @@
+include Dockerfile
+include fathom.png
+include pylintrc
+include runtest.sh
+
+include README.md
+include mkdocs.yml
+recursive-include docs *.md *.png *.js *.css

@@ -1,4 +1,10 @@
 *.pyc
 .*.swp
 .DS_Store
+
+Fathom_Workloads*
+
 deploy/
+build/
+dist/
+
