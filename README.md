@@ -3,7 +3,7 @@
 [![build status](https://img.shields.io/badge/build-disabled-lightgray.svg)](https://travis-ci.org/rdadolf/fathom)
 [![docs status](https://readthedocs.org/projects/fathom/badge/?version=latest)](http://fathom.readthedocs.io/en/latest/)
 
-## Release: [`0.9-soft`](https://github.com/rdadolf/fathom/releases)
+## Release: [`1.0-rc0`](https://github.com/rdadolf/fathom/releases)
 
 This release reflects the state of Fathom more or less as it was for the paper published in September 2016. We are currently developing a somewhat more user-friendly version, which you can track in the GitHub issue tracker. If you're eager to use Fathom as it is, please let us know.
 
@@ -28,8 +28,6 @@ DeepQ    | Atari-playing neural network from DeepMind. Achieves superhuman perfo
 
 ## Getting Started
 
-We've begun to put together some actual documentation, and it's already better than what we had:
+Read the [Fathom Quickstart Guide](http://fathom.readthedocs.io/en/latest/quickstart/) and let us know if you have any questions.
 
- - [Fathom Quickstart Guide](http://fathom.readthedocs.io/en/latest/quickstart/).
-
-Please bear with us as the docs get fleshed out.
+Submit a GitHub issue if you have a suggestion or find a bug.
