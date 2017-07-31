@@ -83,7 +83,7 @@ class AutoencBase(NeuralNetworkModel):
         avg_cost = 0
         for batch_i in range(total_batch):
           if batch_i >= n_steps:
-            return
+            break
           #batch_xs = self.mnist.train.next_batch(self.batch_size)
           batch_xs = get_random_block_from_data(self.X_train, self.batch_size)
 
