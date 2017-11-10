@@ -78,7 +78,6 @@ class Seq2Seq(NeuralNetworkModel):
       def single_cell():
         if self.use_lstm:
             return tf.contrib.rnn.BasicLSTMCell(self.size, reuse=tf.get_variable_scope().reuse)
-            #return tf.contrib.rnn.BasicLSTMCell(self.size, reuse=tf.get_variable_scope().reuse)
         else:
             return tf.contrib.rnn.GRUCell(self.size, reuse=tf.get_variable_scope().reuse)
 
