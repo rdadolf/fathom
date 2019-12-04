@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 # NOTE: Based on Tejas Kulkarni's implementation
 # (https://github.com/mrkulk/deepQN_tensorflow).
+import time
+import datetime
+
 import tensorflow as tf
+import numpy as np
+import cv2
 
 from fathom.nn import GenericModel, default_runstep
 
-from database import *
-from emulator import *
-import tensorflow as tf
-import numpy as np
-import time
-import cv2
-import datetime
+from .database import *
+from .emulator import *
 
 # TODO: clean up this file
 nature_params = {
@@ -188,7 +188,7 @@ class DeepQ(GenericModel):
 
   def build_inference(self):
     with self.G.as_default():
-      print 'Building QNet and targetnet...'
+      print('Building QNet and targetnet...')
       self.qnet = DeepQNetNature(self.params, self.G)
       self.targetnet = DeepQNetNature(self.params, self.G)
       saver_dict = {'qw1':self.qnet.w1,'qb1':self.qnet.b1,
@@ -216,13 +216,13 @@ class DeepQ(GenericModel):
         self.targetnet.w5.assign(self.qnet.w5),self.targetnet.b5.assign(self.qnet.b5)]
 
       if self.params['ckpt_file'] is not None:
-        print 'loading checkpoint : ' + self.params['ckpt_file']
+        print('loading checkpoint : ' + self.params['ckpt_file'])
         self.saver.restore(self.sess,self.params['ckpt_file'])
         temp_train_cnt = self.sess.run(self.qnet.global_step)
         temp_step = temp_train_cnt * self.params['learning_interval']
-        print 'Continue from'
-        print '        -> Steps : ' + str(temp_step)
-        print '        -> Minibatch update : ' + str(temp_train_cnt)
+        print('Continue from')
+        print('        -> Steps : ' + str(temp_step))
+        print('        -> Minibatch update : ' + str(temp_train_cnt))
 
   def model(self):
     return self.G
@@ -305,9 +305,9 @@ class DeepQ(GenericModel):
 
   def run(self, runstep=default_runstep, n_steps=1):
     self.s = time.time()
-    print self.params
-    print 'Start training!'
-    print 'Collecting replay memory for ' + str(self.params['train_start']) + ' steps'
+    print(self.params)
+    print('Start training!')
+    print('Collecting replay memory for ' + str(self.params['train_start']) + ' steps')
 
     with self.G.as_default():
       while self.step < (self.params['steps_per_epoch'] * self.params['num_epochs'] * self.params['learning_interval'] + self.params['train_start']):
@@ -323,7 +323,7 @@ class DeepQ(GenericModel):
           self.DB.insert(self.state_gray_old[26:110,:],self.reward_scaled,self.action_idx,self.terminal)
 
         if not self.forward_only and self.params['copy_freq'] > 0 and self.step % self.params['copy_freq'] == 0 and self.DB.get_size() > self.params['train_start']:
-          print '&&& Copying Qnet to targetnet\n'
+          print('&&& Copying Qnet to targetnet\n')
           self.sess.run(self.cp_ops)
 
         if not self.forward_only and self.step % self.params['learning_interval'] == 0 and self.DB.get_size() > self.params['train_start'] :

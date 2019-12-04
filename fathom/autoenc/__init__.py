@@ -1,1 +1,1 @@
-from variational import Autoenc, AutoencFwd
+from .variational import Autoenc, AutoencFwd

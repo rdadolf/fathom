@@ -1,1 +1,1 @@
-from deepq import DeepQ, DeepQFwd
+from .deepq import DeepQ, DeepQFwd

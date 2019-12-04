@@ -1,1 +1,1 @@
-from alexnet import AlexNet, AlexNetFwd
+from .alexnet import AlexNet, AlexNetFwd

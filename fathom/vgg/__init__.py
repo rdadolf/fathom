@@ -1,1 +1,1 @@
-from vgg import VGG, VGGFwd
+from .vgg import VGG, VGGFwd

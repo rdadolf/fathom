@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import tensorflow as tf
 from abc import ABCMeta, abstractmethod, abstractproperty
+import tensorflow as tf
 
-class GenericModel(object):
-  __metaclass__ = ABCMeta
+class GenericModel(object, metaclass=ABCMeta):
   def __init__(self, device=None, init_options=None):
     self.device=device
 
@@ -27,8 +26,7 @@ def default_runstep(session, sink_ops, *options, **kw_options):
   return session.run(sink_ops, *options, **kw_options)
 
 
-class NeuralNetworkModel(GenericModel):
-  __metaclass__ = ABCMeta
+class NeuralNetworkModel(GenericModel, metaclass=ABCMeta):
   forward_only = False
 
   def __init__(self, device=None, init_options=None):

@@ -27,12 +27,13 @@ setup(name='Fathom-Workloads', # "fathom" is already taken on PyPI
       # We don't use __file__, but mark False to be safe.
       zip_safe=False,
 
+      python_requires='>3.5',
+
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 2.7',
 
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Scientific/Engineering :: Image Recognition',

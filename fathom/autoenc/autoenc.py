@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
 from math import sqrt
+
+import tensorflow as tf
 import numpy as np
 import sklearn.preprocessing as prep
-import tensorflow as tf
+
 from fathom.nn import NeuralNetworkModel, default_runstep
 import fathom.imagenet.mnist as input_data
-
 
 # TODO: create an unsupervised parent class
 
@@ -75,7 +76,7 @@ class AutoencBase(NeuralNetworkModel):
       if self.forward_only:
         self.epochs = 1
 
-      for epoch in xrange(self.epochs):
+      for epoch in range(self.epochs):
         # TODO: re-enable options and metadata, which slow down the run
 
         total_batch = self.mnist.train.num_examples // self.batch_size

@@ -1,1 +1,1 @@
-from memnet import MemNet, MemNetFwd
+from .memnet import MemNet, MemNetFwd

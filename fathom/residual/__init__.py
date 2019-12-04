@@ -1,1 +1,1 @@
-from residual import Residual, ResidualFwd
+from .residual import Residual, ResidualFwd

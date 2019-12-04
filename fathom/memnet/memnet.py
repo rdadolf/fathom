@@ -2,12 +2,15 @@
 
 """Dominique Luna's implementation of End-to-End Memory Networks, refactored."""
 
+from functools import reduce
 from itertools import chain
+
 import tensorflow as tf
 import numpy as np
+
 from sklearn import cross_validation
 from fathom.nn import NeuralNetworkModel, default_runstep
-from data_utils import load_task, vectorize_data
+from .data_utils import load_task, vectorize_data
 
 data_dir = "/data/babi/tasks_1-20_v1-2/en/"
 task_id = 1
@@ -113,10 +116,10 @@ class MemNet(NeuralNetworkModel):
 
     self.memory_size = 50
 
-    self.max_story_size = max(map(len, (s for s, _, _ in train + test)))
-    self.mean_story_size = int(np.mean(map(len, (s for s, _, _ in train + test))))
-    self.sentence_size = max(map(len, chain.from_iterable(s for s, _, _ in train + test)))
-    self.query_size = max(map(len, (q for _, q, _ in train + test)))
+    self.max_story_size = max(list(map(len, (s for s, _, _ in train + test))))
+    self.mean_story_size = int(np.mean(list(map(len, (s for s, _, _ in train + test)))))
+    self.sentence_size = max(list(map(len, chain.from_iterable(s for s, _, _ in train + test))))
+    self.query_size = max(list(map(len, (q for _, q, _ in train + test))))
     self.memory_size = min(self.memory_size, self.max_story_size)
     self.vocab_size = len(word_idx) + 1 # +1 for nil word
     self.sentence_size = max(self.query_size, self.sentence_size) # for the position

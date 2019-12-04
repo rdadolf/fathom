@@ -1,1 +1,1 @@
-from speech import Speech, SpeechFwd
+from .speech import Speech, SpeechFwd

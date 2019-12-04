@@ -1,5 +1,5 @@
 # Dominique Luna's implementation
-from __future__ import absolute_import
+
 
 import os
 import re
@@ -56,7 +56,7 @@ def parse_stories(lines, only_supporting=False):
 
       if only_supporting:
         # Only select the related substory
-        supporting = map(int, supporting.split())
+        supporting = list(map(int, supporting.split()))
         substory = [story[i - 1] for i in supporting]
       else:
         # Provide all the substories

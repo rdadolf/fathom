@@ -36,9 +36,9 @@
  eval_image: Prepare one image for evaluation.
  distort_color: Distort the color in one image for training.
 """
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
+
+
+
 
 
 import tensorflow as tf

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
-import tensorflow as tf
-import numpy as np
-
 import math
 import random
 import sys
 import time
 
+import tensorflow as tf
+import numpy as np
+
 from fathom.nn import NeuralNetworkModel, default_runstep
 
-import data_utils
+from . import data_utils
 
 class Seq2Seq(NeuralNetworkModel):
   """Based on TensorFlow example of sequence-to-sequence translation."""
@@ -17,10 +17,10 @@ class Seq2Seq(NeuralNetworkModel):
     # Feeds for inputs.
     self.encoder_inputs = []
     self.decoder_inputs = []
-    for i in xrange(self.buckets[-1][0]):  # Last bucket is the biggest one.
+    for i in range(self.buckets[-1][0]):  # Last bucket is the biggest one.
       self.encoder_inputs.append(tf.placeholder(tf.int32, shape=[None],
                                                 name="encoder{0}".format(i)))
-    for i in xrange(self.buckets[-1][1] + 1):
+    for i in range(self.buckets[-1][1] + 1):
       self.decoder_inputs.append(tf.placeholder(tf.int32, shape=[None],
                                                 name="decoder{0}".format(i)))
 
@@ -35,10 +35,10 @@ class Seq2Seq(NeuralNetworkModel):
   def build_labels(self):
     # Our targets are decoder inputs shifted by one.
     self.targets = [self.decoder_inputs[i + 1]
-               for i in xrange(len(self.decoder_inputs) - 1)]
+               for i in range(len(self.decoder_inputs) - 1)]
 
     self.target_weights = []
-    for i in xrange(self.buckets[-1][1] + 1):
+    for i in range(self.buckets[-1][1] + 1):
       self.target_weights.append(tf.placeholder(tf.float32, shape=[None],
                                                 name="weight{0}".format(i)))
 
@@ -77,16 +77,16 @@ class Seq2Seq(NeuralNetworkModel):
       # Create the internal multi-layer cell for our RNN.
       def single_cell():
         if self.use_lstm:
-            return tf.contrib.rnn.BasicLSTMCell(self.size, reuse=tf.get_variable_scope().reuse)
+          return tf.contrib.rnn.BasicLSTMCell(self.size, reuse=tf.get_variable_scope().reuse)
         else:
-            return tf.contrib.rnn.GRUCell(self.size, reuse=tf.get_variable_scope().reuse)
+          return tf.contrib.rnn.GRUCell(self.size, reuse=tf.get_variable_scope().reuse)
 
       # The seq2seq function: we use embedding for the input and attention.
       def seq2seq_f(encoder_inputs, decoder_inputs, do_decode):
         if self.num_layers > 1:
-            cell = tf.contrib.rnn.MultiRNNCell([single_cell() for _ in range (self.num_layers)])
+          cell = tf.contrib.rnn.MultiRNNCell([single_cell() for _ in range (self.num_layers)])
         else:
-            cell = single_cell()
+          cell = single_cell()
         return tf.contrib.legacy_seq2seq.embedding_attention_seq2seq(
             encoder_inputs, decoder_inputs, cell,
             num_encoder_symbols=self.source_vocab_size,
@@ -103,7 +103,7 @@ class Seq2Seq(NeuralNetworkModel):
             softmax_loss_function=softmax_loss_function)
         # If we use output projection, we need to project outputs for decoding.
         if output_projection is not None:
-          for b in xrange(len(self.buckets)):
+          for b in range(len(self.buckets)):
             self._outputs[b] = [
                 tf.matmul(output, output_projection[0]) + output_projection[1]
                 for output in self._outputs[b]
@@ -141,13 +141,13 @@ class Seq2Seq(NeuralNetworkModel):
         self.gradient_norms = []
         self.updates = []
         self.opt = tf.train.GradientDescentOptimizer(self.learning_rate)
-        for b in xrange(len(self.buckets)):
+        for b in range(len(self.buckets)):
           gradients = tf.gradients(self.losses[b], params)
           clipped_gradients, norm = tf.clip_by_global_norm(gradients,
                                                            self.max_gradient_norm)
           self.gradient_norms.append(norm)
           self.updates.append(self.opt.apply_gradients(
-              zip(clipped_gradients, params), global_step=self.global_step))
+              list(zip(clipped_gradients, params)), global_step=self.global_step))
 
     return self.updates # note: this is per-bucket
 
@@ -160,18 +160,18 @@ class Seq2Seq(NeuralNetworkModel):
         self.data_dir, self.en_vocab_size, self.fr_vocab_size)
 
     # Read data into buckets and compute their sizes.
-    print ("Reading development and training data (limit: %d)."
+    print("Reading development and training data (limit: %d)."
            % self.max_train_data_size)
     self.dev_set = self.read_data(en_dev, fr_dev)
     self.train_set = self.read_data(en_train, fr_train, self.max_train_data_size)
-    train_bucket_sizes = [len(self.train_set[b]) for b in xrange(len(self._buckets))]
+    train_bucket_sizes = [len(self.train_set[b]) for b in range(len(self._buckets))]
     train_total_size = float(sum(train_bucket_sizes))
 
     # A bucket scale is a list of increasing numbers from 0 to 1 that we'll use
     # to select a bucket. Length of [scale[i], scale[i+1]] is proportional to
     # the size if i-th training bucket, as used later.
     self.train_buckets_scale = [sum(train_bucket_sizes[:i + 1]) / train_total_size
-                           for i in xrange(len(train_bucket_sizes))]
+                           for i in range(len(train_bucket_sizes))]
 
   def read_data(self, source_path, target_path, max_size=None):
     """Read data from source and target files and put into buckets.
@@ -258,7 +258,7 @@ class Seq2Seq(NeuralNetworkModel):
       # Choose a bucket according to data distribution. We pick a random number
       # in [0, 1] and use the corresponding interval in train_buckets_scale.
       random_number_01 = np.random.random_sample()
-      bucket_id = min([i for i in xrange(len(self.train_buckets_scale))
+      bucket_id = min([i for i in range(len(self.train_buckets_scale))
                        if self.train_buckets_scale[i] > random_number_01])
 
       # Get a batch and make a step.
@@ -291,7 +291,7 @@ class Seq2Seq(NeuralNetworkModel):
           # Print statistics for the previous epoch.
           perplexity = math.exp(loss) if loss < 300 else float('inf')
           with self.session.as_default():
-            print ("global step %d learning rate %.4f step-time %.2f perplexity "
+            print("global step %d learning rate %.4f step-time %.2f perplexity "
                    "%.2f" % (self.global_step.eval(), self.learning_rate.eval(),
                              step_time, perplexity))
           # Decrease learning rate if no improvement was seen over last 3 times.
@@ -303,7 +303,7 @@ class Seq2Seq(NeuralNetworkModel):
           #self.saver.save(sess, checkpoint_path, global_step=self.global_step)
           step_time, loss = 0.0, 0.0
           # Run evals on development set and print their perplexity.
-          for bucket_id in xrange(len(self._buckets)):
+          for bucket_id in range(len(self._buckets)):
             if len(self.dev_set[bucket_id]) == 0:
               print("  eval: empty bucket %d" % (bucket_id))
               continue
@@ -363,10 +363,10 @@ class Seq2Seq(NeuralNetworkModel):
 
     # Input feed: encoder inputs, decoder inputs, target_weights, as provided.
     input_feed = {}
-    for l in xrange(encoder_size):
+    for l in range(encoder_size):
       input_feed[self.encoder_inputs[l].name] = encoder_inputs[l]
       #print("encoder", len(encoder_inputs[l]), self.encoder_inputs[l].get_shape())
-    for l in xrange(decoder_size):
+    for l in range(decoder_size):
       input_feed[self.decoder_inputs[l].name] = decoder_inputs[l]
       #print("decoder", len(decoder_inputs[l]), self.decoder_inputs[l].get_shape())
       input_feed[self.target_weights[l].name] = target_weights[l]
@@ -384,7 +384,7 @@ class Seq2Seq(NeuralNetworkModel):
                      self.losses[bucket_id]]  # Loss for this batch.
     else:
       output_feed = [self.losses[bucket_id]]  # Loss for this batch.
-      for l in xrange(decoder_size):  # Output logits.
+      for l in range(decoder_size):  # Output logits.
         output_feed.append(self._outputs[bucket_id][l])
 
     return output_feed, input_feed
@@ -410,7 +410,7 @@ class Seq2Seq(NeuralNetworkModel):
 
     # Get a random batch of encoder and decoder inputs from data,
     # pad them if needed, reverse encoder inputs and add GO to decoder.
-    for _ in xrange(self.batch_size):
+    for _ in range(self.batch_size):
       encoder_input, decoder_input = random.choice(data[bucket_id])
 
       # Encoder inputs are padded and then reversed.
@@ -426,20 +426,20 @@ class Seq2Seq(NeuralNetworkModel):
     batch_encoder_inputs, batch_decoder_inputs, batch_weights = [], [], []
 
     # Batch encoder inputs are just re-indexed encoder_inputs.
-    for length_idx in xrange(encoder_size):
+    for length_idx in range(encoder_size):
       batch_encoder_inputs.append(
           np.array([encoder_inputs[batch_idx][length_idx]
-                    for batch_idx in xrange(self.batch_size)], dtype=np.int32))
+                    for batch_idx in range(self.batch_size)], dtype=np.int32))
 
     # Batch decoder inputs are re-indexed decoder_inputs, we create weights.
-    for length_idx in xrange(decoder_size):
+    for length_idx in range(decoder_size):
       batch_decoder_inputs.append(
           np.array([decoder_inputs[batch_idx][length_idx]
-                    for batch_idx in xrange(self.batch_size)], dtype=np.int32))
+                    for batch_idx in range(self.batch_size)], dtype=np.int32))
 
       # Create target_weights to be 0 for targets that are padding.
       batch_weight = np.ones(self.batch_size, dtype=np.float32)
-      for batch_idx in xrange(self.batch_size):
+      for batch_idx in range(self.batch_size):
         # We set weight to 0 if the corresponding target is a PAD symbol.
         # The corresponding target is decoder_input shifted by 1 forward.
         if length_idx < decoder_size - 1:
